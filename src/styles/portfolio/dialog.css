@@ -1,0 +1,51 @@
+/* Portfolio project details (native modal <dialog>, see ProjectDetails.tsx). */
+.project-dialog {
+  width: min(680px, calc(100vw - 24px));
+  max-width: none;
+  max-height: min(88svh, 880px);
+  margin: auto;
+  padding: 0;
+  border: 0;
+  border-radius: var(--r-panel);
+  color: var(--color-cream);
+  background: var(--project-sheet-fill);
+  box-shadow: var(--shadow-lit);
+}
+.project-dialog[open] {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.project-dialog-body {
+  overscroll-behavior: contain;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(180deg, transparent, #000 12px, #000 calc(100% - 24px), transparent);
+}
+.project-dialog::backdrop {
+  background: var(--project-scrim);
+}
+.project-dialog:focus-visible {
+  outline: none;
+}
+/* Open / close: fade + a small rise (ProjectDetails.tsx sets data-anim only with motion
+   allowed, and data-state around showModal() / before close()). Timings: motion.dialog. */
+.project-dialog[data-anim] {
+  transition:
+    opacity var(--dialog-ms, 180ms) ease-out,
+    transform var(--dialog-ms, 180ms) var(--dialog-ease, ease-out);
+}
+.project-dialog[data-anim]::backdrop {
+  transition: opacity var(--dialog-ms, 180ms) ease-out;
+}
+.project-dialog[data-anim][data-state] {
+  opacity: 0;
+  transform: translate3d(0, var(--dialog-rise, 10px), 0);
+}
+.project-dialog[data-anim][data-state]::backdrop {
+  opacity: 0;
+}
+/* The custom cursor lives under the top layer: hide it while a modal is open (the
+   native cursor is used inside the dialog). */
+:root:has(dialog:modal) :is(.cursor-orb, .cursor-pill) {
+  opacity: 0 !important;
+}

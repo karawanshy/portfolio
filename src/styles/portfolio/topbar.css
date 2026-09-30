@@ -1,0 +1,125 @@
+/* ---------------------------------------------------------------------------
+ * Portfolio top bar (TopBar.tsx): fixed on every breakpoint. Its backdrop fades in
+ * once the page has scrolled (data-scrolled, set from driver.ts's onScroll); without
+ * JS it is always on. Anchor jumps land below the bar.
+ * ------------------------------------------------------------------------- */
+html:has([data-topbar]) {
+  scroll-padding-top: var(--topbar-h);
+}
+@layer components {
+  [data-topbar-backdrop] {
+    background: var(--topbar-fill);
+    box-shadow: var(--topbar-line);
+    -webkit-backdrop-filter: var(--topbar-blur);
+    backdrop-filter: var(--topbar-blur);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+  [data-topbar][data-scrolled='true'] [data-topbar-backdrop],
+  html:not(.js) [data-topbar-backdrop] {
+    opacity: 1;
+  }
+  /* After a jump (anchor link), switch at once: a fade would show what lands under the bar. */
+  [data-topbar][data-jump='true'] [data-topbar-backdrop] {
+    transition: none;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-topbar-backdrop] {
+      transition: none;
+    }
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Top bar Story pill (StoryPill.tsx). The sheen band is clipped by its own layer (so the pill's
+ * invisible phone tap target may overhang it);
+ * the glow is a sibling layer behind it. The ONE animation is the sheen: held off-pill,
+ * a sweep across, held again (keyframe stops mirror motion.storySheen — storySheen.test.ts),
+ * transform only, off with reduced motion. Hover / focus: the glow brightens, the pill lifts 1px.
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .story-pill-wrap {
+    isolation: isolate;
+  }
+  .story-pill {
+    background: var(--gradient-story-pill);
+    box-shadow: var(--shadow-story-pill);
+    transition: transform 0.2s ease;
+  }
+  .story-pill-orb {
+    background: var(--story-pill-orb);
+  }
+  .story-pill-clip {
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    overflow: hidden;
+    pointer-events: none;
+  }
+  .story-pill-sheen {
+    position: absolute;
+    inset-block: 0;
+    left: 0;
+    width: 60%;
+    background: var(--story-sheen);
+    transform: translateX(-120%);
+    pointer-events: none;
+  }
+  .story-pill-glow {
+    position: absolute;
+    inset: -8px;
+    z-index: -1;
+    border-radius: 9999px;
+    background: var(--story-pill-glow);
+    filter: blur(10px);
+    opacity: 0.6;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+  .story-pill:is(:hover, :focus-visible) {
+    transform: translateY(-1px);
+  }
+  .story-pill:is(:hover, :focus-visible) + .story-pill-glow {
+    opacity: 0.85;
+  }
+  /* The back pill's hover ring: the Portfolio's cursor pill (Cursor.tsx, padding
+     motion.cursor.pillPadding), drawn in CSS since the Story has no custom cursor. */
+  .story-pill-ring {
+    position: absolute;
+    inset: -5px;
+    border-radius: 9999px;
+    background: var(--cursor-pill-fill);
+    box-shadow: var(--cursor-pill-ring);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease-out;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .story-pill:hover ~ .story-pill-ring {
+      opacity: 1;
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .story-pill-sheen {
+      animation: story-sheen var(--story-sheen-cycle, 3.2s) ease-in-out infinite;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .story-pill,
+    .story-pill-glow,
+    .story-pill-ring {
+      transition: none;
+    }
+  }
+}
+
+@keyframes story-sheen {
+  0%,
+  45% {
+    transform: translateX(-120%);
+  }
+  75%,
+  100% {
+    transform: translateX(260%);
+  }
+}

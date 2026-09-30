@@ -1,0 +1,165 @@
+/* ---------------------------------------------------------------------------
+ * Hero layout switching (values come from heroGeometry via custom properties set on
+ * the section in Hero.tsx). Pure CSS so prerendered HTML is correct at every width
+ * before hydration. Phones: a grid — the name + paragraph with the portrait beside them, then CTAs + proof strip (the intro box is `display: contents`, so
+ * its children and the portrait share the grid). Tablet: stacked, intro → portrait
+ * (centred). lg+: the
+ * portrait stands on the right, anchored to the group's right edge and to the intro's
+ * top; .hero-main reserves her full height, the intro column narrows to stay clear of
+ * her, and on wide screens the two stay one centred group. Every layout fades her lower
+ * edge out (--photo-fade).
+ * ------------------------------------------------------------------------- */
+@layer components {
+  .hero {
+    --horizon-gap: var(--horizon-gap-base);
+    padding-top: calc(var(--topbar-h) + var(--hero-top-m));
+    --photo-fade: var(--photo-m-fade);
+  }
+  @media (max-width: 767.98px) {
+    .hero-main {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) var(--photo-m-col);
+      column-gap: var(--photo-m-gap);
+      row-gap: var(--intro-gap-m);
+      align-items: start;
+    }
+    /* (.hero-intro is `display: contents` here: max-md:contents in Hero.tsx.) */
+    /* Text above the portrait's glow (which spreads past her box). */
+    .hero-intro > :not(.sr-only) {
+      position: relative;
+      z-index: 2;
+      grid-column: 1 / -1;
+    }
+    .hero-intro > h1 {
+      grid-row: 1;
+      grid-column: 1;
+    }
+    .hero-intro > .hero-body {
+      grid-row: 2;
+      grid-column: 1;
+    }
+    .hero-intro > .hero-ctas {
+      grid-row: 3;
+    }
+    .hero-intro > .hero-proof {
+      grid-row: 4;
+    }
+    .hero-portrait {
+      position: relative;
+      z-index: 1;
+      grid-row: 1 / span 2;
+      grid-column: 2;
+      width: 100%;
+    }
+  }
+  /* Fade her lower edge out, fully transparent at the box bottom: no hard photo edge, also while
+     the parallax drifts her down. The mask sits on the img, not the filtered wrapper, so the
+     wrapper's drop-shadow glow is drawn around the already-masked silhouette (a mask on the
+     wrapper would clip the glow flat at the box edges). */
+  .hero-photo > img {
+    mask-image: linear-gradient(
+      180deg,
+      black calc(100% - var(--photo-fade)),
+      rgb(0 0 0 / 0.55) calc(100% - 0.55 * var(--photo-fade)),
+      transparent
+    );
+  }
+  /* md+: the hero fills at least the screen, so the next section never peeks in on load. Any
+     extra height is split evenly by the auto margins: half above the intro + portrait group
+     (it moves down as one; the portrait stays anchored to the intro), half as breathing room
+     before the closing horizon line (none under the proof strip). */
+  @media (min-width: 768px) {
+    .hero {
+      display: flex;
+      flex-direction: column;
+      min-height: 100svh;
+      padding-top: calc(var(--topbar-h) + var(--hero-top-t));
+      --photo-fade: var(--photo-t-fade);
+    }
+    .hero-main {
+      margin-block: auto;
+    }
+    .hero-portrait {
+      position: relative;
+      width: var(--photo-t-w);
+      margin: var(--photo-t-gap) auto 0;
+    }
+  }
+  @media (min-width: 1024px) {
+    .hero {
+      /* Content centred between the top bar and the horizon line (auto margins on .hero-main),
+         `lift` above centre: at least `room` above it, room + 2 × lift below it. */
+      padding-top: calc(var(--topbar-h) + var(--hero-room-d));
+      --horizon-gap: calc(var(--hero-room-d) + 2 * var(--hero-lift-d));
+      --photo-fade: var(--photo-d-fade);
+    }
+    /* Room for her full height (box top --photo-d-rise above the intro top, so her head is
+       level with the name's cap height), so her faded end stays
+       above the closing horizon line; a taller intro simply pushes the line further down. */
+    .hero-main {
+      width: 100%;
+      max-width: calc(var(--intro-max) + var(--photo-group-gap) + var(--photo-d-w));
+      margin-inline: auto;
+      min-height: calc(var(--photo-d-w) * var(--photo-ratio) - var(--photo-d-rise));
+    }
+    .hero-intro {
+      max-width: min(var(--intro-max), 100% - var(--photo-d-w) - var(--photo-text-gap));
+    }
+    .hero-portrait {
+      position: absolute;
+      top: calc(-1 * var(--photo-d-rise));
+      right: 0;
+      width: var(--photo-d-w);
+      margin: 0;
+    }
+  }
+
+  /* Proof strip (Hero.tsx Proof; sizes from heroGeometry.proof): value over caption per item.
+     md+ where the column is wide: one row, values level at the top, a hairline between.
+     Phones and the 1024–1279 band (the intro column narrows beside the portrait): stacked. */
+  .hero-proof {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+  .hero-proof > li {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+    min-width: 0;
+  }
+  .hero-proof-value {
+    font-size: var(--proof-secondary);
+  }
+  .hero-proof > li[data-primary] .hero-proof-value {
+    font-size: var(--proof-primary-m);
+  }
+  .hero-proof-caption {
+    font-size: var(--proof-caption);
+  }
+  @media (min-width: 768px) {
+    .hero-proof > li[data-primary] .hero-proof-value {
+      font-size: var(--proof-primary);
+      white-space: nowrap;
+    }
+  }
+  @media (min-width: 768px) and (max-width: 1023.98px), (min-width: 1280px) {
+    .hero-proof {
+      flex-direction: row;
+      align-items: stretch;
+      gap: 0;
+    }
+    .hero-proof > li {
+      gap: 6px;
+    }
+    .hero-proof > li[data-primary] {
+      flex: none;
+    }
+    .hero-proof > li + li {
+      margin-left: var(--proof-divider);
+      padding-left: var(--proof-divider);
+      border-left: 1px solid color-mix(in srgb, var(--color-cream) 15%, transparent);
+    }
+  }
+}

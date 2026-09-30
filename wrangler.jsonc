@@ -1,0 +1,18 @@
+// Static site on Cloudflare Workers: `npm run build` prerenders into dist/, which is
+// uploaded as-is. This file stops `wrangler deploy` from auto-configuring the project
+// (it adds @cloudflare/vite-plugin and rebuilds, which breaks the SSR prerender build).
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "karawan-portfolio",
+  "compatibility_date": "2026-09-27",
+  "assets": {
+    "directory": "./dist",
+    // /story → dist/story.html or dist/story/index.html
+    "html_handling": "auto-trailing-slash",
+    // Unknown paths get index.html; main.tsx skips hydration when data-route doesn't match.
+    "not_found_handling": "single-page-application"
+  },
+  // Branch/PR builds run `wrangler preview`, which needs this block (empty: previews reuse
+  // the top-level assets and settings).
+  "previews": {}
+}

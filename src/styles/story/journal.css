@@ -1,0 +1,240 @@
+/*
+ * Story — the "Explore the story" journal page (StoryDialog layout 'journal', StoryPanel).
+ * Below lg: a bottom sheet. From lg: a centred card. Same surface on both, tinted by the
+ * act's accent (data-accent). Timings come from motion.story.journal (inline custom
+ * properties on .journal): on open the scrim fades in and the card rises + fades in;
+ * prev / next crossfades the body. Reduced motion: opacity only.
+ */
+@layer components {
+  .journal-card[data-accent='peach'] {
+    --journal-accent: var(--color-peach);
+    --journal-fill: var(--journal-fill-peach);
+    --journal-shadow: var(--journal-shadow-peach);
+  }
+  .journal-card[data-accent='pink'] {
+    --journal-accent: var(--color-pink);
+    --journal-fill: var(--journal-fill-pink);
+    --journal-shadow: var(--journal-shadow-pink);
+  }
+  .journal-card[data-accent='lilac'] {
+    --journal-accent: var(--color-lilac);
+    --journal-fill: var(--journal-fill-lilac);
+    --journal-shadow: var(--journal-shadow-lilac);
+  }
+  .journal-card[data-accent='tangerine'] {
+    --journal-accent: var(--color-tangerine);
+    --journal-fill: var(--journal-fill-tangerine);
+    --journal-shadow: var(--journal-shadow-tangerine);
+  }
+
+  .journal-scrim {
+    position: absolute;
+    inset: 0;
+    background: var(--journal-scrim);
+    -webkit-backdrop-filter: blur(var(--journal-backdrop-blur));
+    backdrop-filter: blur(var(--journal-backdrop-blur));
+    animation: journal-fade var(--journal-ms) ease-out both;
+  }
+
+  /* Phones / tablets: bottom sheet. */
+  .journal-card {
+    --journal-pad-l: 24px;
+    --journal-pad-r: 16px;
+    position: absolute;
+    inset: auto 0 0 0;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    max-height: 88svh;
+    border-radius: var(--journal-radius) var(--journal-radius) 0 0;
+    background: var(--journal-fill, var(--story-sheet-fill));
+    box-shadow: var(--journal-shadow, var(--journal-shadow-base));
+    animation: journal-rise var(--journal-ms) var(--journal-ease) both;
+  }
+  @media (max-height: 480px) {
+    .journal-card {
+      max-height: calc(100svh - 12px);
+    }
+  }
+  /* lg: a centred card. */
+  @media (min-width: 1024px) {
+    .journal-card {
+      --journal-pad-l: 44px;
+      --journal-pad-r: 30px;
+      inset: 0;
+      margin: auto;
+      width: var(--journal-width);
+      max-width: calc(100vw - 2 * var(--gutter));
+      height: min(var(--journal-height), 100dvh - 68px);
+      max-height: none;
+      border-radius: var(--journal-radius);
+    }
+  }
+
+  .journal-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 22px var(--journal-pad-r) 0 var(--journal-pad-l);
+  }
+  @media (min-width: 1024px) {
+    .journal-header {
+      padding-top: 26px;
+    }
+  }
+  .journal-accent-text {
+    color: var(--journal-accent);
+  }
+  .journal-act {
+    font-size: var(--fs-journal-act);
+    line-height: 1.4;
+    color: var(--color-text-2);
+    opacity: 0.8;
+  }
+
+  .journal-body {
+    min-height: 0;
+    flex: 1;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    /* Room for the last line to scroll clear of the bottom fade. */
+    padding: 14px 24px 40px var(--journal-pad-l);
+    -webkit-mask-image: linear-gradient(to bottom, black 88%, transparent);
+    mask-image: linear-gradient(to bottom, black 88%, transparent);
+    animation: journal-fade var(--journal-crossfade-ms) ease-out both;
+  }
+  /* The body is a focusable region (keyboard scrolling): an inset ring, so the card's
+     overflow doesn't clip it, and no bottom fade while it's focused (the mask would fade it). */
+  .journal-body:focus-visible {
+    outline-offset: -2px;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+  @media (max-width: 1023.98px) {
+    .journal-body > * {
+      max-width: var(--journal-sheet-measure);
+    }
+  }
+  @media (min-width: 1024px) {
+    .journal-body {
+      padding: 16px 60px 48px var(--journal-pad-l);
+    }
+  }
+  .journal-title {
+    font-size: var(--fs-journal-title-sheet);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 1.15;
+    margin-bottom: 20px;
+  }
+  @media (min-width: 1024px) {
+    .journal-title {
+      font-size: var(--fs-journal-title);
+    }
+  }
+  .journal-paragraphs {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    font-size: var(--fs-journal-body);
+    line-height: 1.8;
+    color: var(--color-text-2);
+  }
+  .journal-beat {
+    padding: 8px 0;
+    text-align: center;
+    font-size: var(--fs-journal-beat);
+    font-weight: 600;
+    line-height: 1.5;
+    color: var(--color-cream);
+  }
+  .journal-beat strong {
+    font-weight: inherit;
+  }
+  /* Set like the scene's quote (Scene.tsx `Quote`), at the page's size: no box. */
+  .journal-quote {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: var(--fs-journal-quote);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -0.045em;
+    text-wrap: balance;
+  }
+  .journal-quote-accent {
+    background-image: var(--quote-accent);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  .journal-dive-heading {
+    font-size: var(--fs-journal-dive-heading);
+    color: var(--journal-accent);
+  }
+  .journal-dive-body {
+    font-size: var(--fs-journal-dive-body);
+    line-height: 1.7;
+    color: var(--color-text-2);
+  }
+
+  .journal-footer {
+    display: grid;
+    grid-template-columns: 1fr minmax(0, 180px) 1fr;
+    align-items: center;
+    gap: 12px;
+    padding: 10px var(--journal-pad-r) max(14px, env(safe-area-inset-bottom)) var(--journal-pad-l);
+    border-top: 1px solid var(--journal-hairline);
+  }
+  @media (min-width: 1024px) {
+    .journal-footer {
+      padding: 14px var(--journal-pad-r) 22px var(--journal-pad-l);
+    }
+  }
+  .journal-nav {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 44px;
+    min-width: 44px;
+    padding: 0 10px;
+    margin: 0 -10px;
+    border-radius: var(--radius-pill);
+    font-size: 14px;
+    font-weight: 700;
+    white-space: nowrap;
+    color: var(--color-text-2);
+  }
+  .journal-nav:hover {
+    color: var(--color-cream);
+  }
+  .journal-track {
+    height: 3px;
+    border-radius: 999px;
+    background: var(--journal-track);
+    overflow: hidden;
+  }
+  .journal-track-fill {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, color-mix(in srgb, var(--journal-accent) 45%, transparent), var(--journal-accent));
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .journal-card {
+      animation-name: journal-fade;
+    }
+  }
+}
+
+@keyframes journal-fade {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes journal-rise {
+  from {
+    opacity: 0;
+    transform: translate3d(0, var(--journal-rise), 0);
+  }
+}

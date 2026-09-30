@@ -1,0 +1,57 @@
+/* Base element styles. */
+
+@layer base {
+  html {
+    background: var(--color-ink);
+    color-scheme: dark;
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--color-ink);
+    color: var(--color-text-2);
+    font-family: var(--font-body);
+    font-size: var(--fs-body);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: clip;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-display);
+    color: var(--color-cream);
+    margin: 0;
+  }
+
+  p {
+    margin: 0;
+  }
+
+  img,
+  svg {
+    display: block;
+  }
+
+  ::selection {
+    background: rgb(255 61 139 / 0.4);
+    color: var(--color-cream);
+  }
+
+  /* Global focus: pink ring, only for keyboard focus. */
+  :focus-visible {
+    outline: 2px solid var(--focus-ring);
+    outline-offset: 3px; /* outlines follow each element's own border-radius */
+  }
+
+  /* Programmatic focus targets (sections, main) — no ring around whole regions. */
+  [tabindex='-1']:focus {
+    outline: none;
+  }
+}

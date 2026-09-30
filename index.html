@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#120812" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Karawan, Software Engineer at Axonius. Full-stack today, drawn to infrastructure, CI reliability, developer tooling and automation."
+    />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>Karawan · Software Engineer</title>
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Karawan" />
+    <meta property="og:title" content="Karawan · Software Engineer" />
+    <meta
+      property="og:description"
+      content="Software Engineer at Axonius. Full-stack today, drawn to infrastructure, CI reliability, developer tooling and automation."
+    />
+    <meta property="og:image" content="/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Karawan, smiling, in a black hijab and dark green top, on a dark sunset background" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <!-- Marks JS as available before first paint; no-JS fallbacks key off html:not(.js).
+         A reload starts the page over at the top: the hash is dropped before the browser can
+         scroll to it (router.ts installHistory then keeps it at the top). -->
+    <script>
+      document.documentElement.classList.add('js');
+      (function () {
+        var nav = performance.getEntriesByType && performance.getEntriesByType('navigation')[0];
+        if (!nav || nav.type !== 'reload') return;
+        if ('scrollRestoration' in history) history.scrollRestoration = 'manual';
+        history.replaceState(null, '', location.pathname + location.search);
+      })();
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>

@@ -1,0 +1,188 @@
+/* ---------------------------------------------------------------------------
+ * Pinned project rail (useProjectRail `pin` mode): the section is one viewport plus
+ * the slide plus an end hold tall, and the stage sticks vertically centred. Scroll:
+ * the stage settles to centre, the rail slides (from the section top, so #projects
+ * lands on card 1), then holds with the last card on the gutter while still pinned.
+ * JS measures --rail-slide / --rail-stage-h; the defaults below are the same numbers
+ * computed from the design card widths, so the prerendered page (html.js, before
+ * hydration) already has the pinned layout and deep links don't shift.
+ * Keep in sync: 1.3 = motion.rail.scrollPerPx, 64px = motion.rail.endHold
+ * (rail.test.ts), 840 + 720 + 640 = the card design widths and 24px the md+ gap
+ * (Projects.tsx), 2117px ↔ motion.rail.minTravel, 24px in the pre-hydration fit step =
+ * motion.rail.fitMargin, and --rail-stage-h = the measured stage height per width band
+ * (below; stage offsetHeight at each width — re-measure if Projects copy or layout
+ * changes). e2e/motion.spec.ts checks the prerendered pin against the hydrated one.
+ * ------------------------------------------------------------------------- */
+[data-rail-mode] {
+  --rail-slide: calc((840px + 720px + 640px + 2 * 24px + 2 * var(--gutter) - 100vw) * 1.3);
+  --rail-end-hold: 64px;
+  --rail-stage-h: 689px;
+}
+@media (min-width: 1031px) { [data-rail-mode] { --rail-stage-h: 690px; } }
+@media (min-width: 1114px) { [data-rail-mode] { --rail-stage-h: 691px; } }
+@media (min-width: 1166px) { [data-rail-mode] { --rail-stage-h: 692px; } }
+@media (min-width: 1237px) { [data-rail-mode] { --rail-stage-h: 693px; } }
+@media (min-width: 1324px) { [data-rail-mode] { --rail-stage-h: 694px; } }
+@media (min-width: 1327px) { [data-rail-mode] { --rail-stage-h: 695px; } }
+@media (min-width: 1414px) { [data-rail-mode] { --rail-stage-h: 696px; } }
+[data-rail-mode='pin'] {
+  height: calc(max(100vh, var(--rail-stage-h)) + var(--rail-slide) + var(--rail-end-hold));
+}
+[data-rail-mode='pin'] > [data-rail-stage] {
+  position: sticky;
+  top: max(0px, calc((100vh - var(--rail-stage-h)) / 2));
+}
+/*
+ * Before hydration the markup is in its server mode (`swipe`); where JS will pin, pin now.
+ * JS pins only if stage + fitMargin ≤ 100vh: the clamp() is that step (the stage's own
+ * height when it doesn't fit — the section is just the stage, so min-height leaves it
+ * as it is — the full pin when it does).
+ */
+@media (min-width: 1024px) and (max-width: 2116.98px) and (prefers-reduced-motion: no-preference) {
+  html.js [data-rail-mode='swipe'] {
+    min-height: calc(
+      var(--rail-stage-h) +
+        clamp(
+          0px,
+          (100vh - var(--rail-stage-h) - 24px + 0.001px) * 100000,
+          max(0px, 100vh - var(--rail-stage-h)) + var(--rail-slide) + var(--rail-end-hold)
+        )
+    );
+  }
+  html.js [data-rail-mode='swipe'] > [data-rail-stage] {
+    position: sticky;
+    top: max(0px, calc((100vh - var(--rail-stage-h)) / 2));
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Reveal sequence — Skills (motion/useRevealSequence.ts). Markup:
+ *   section[data-seq][data-seq-mode] > [data-seq-track] > [data-seq-stage] + [data-seq-spacer]
+ * `pin` mode: the spacer adds --seq-count × perBox + endHold of scroll and the stage
+ * sticks, centred in the viewport below the top bar — but no lower than --seq-clear (JS:
+ * the distance from the previous section's closing line down to the stage), so the pin
+ * starts only once that line has scrolled away under the bar. The stage ends with the
+ * section's own closing line ([data-seq-line]), the sequence's last step: it draws out
+ * from its centre. `scrub` / `static` / no JS: plain flow.
+ * Before hydration (mode `auto`) the stage is already sticky and the spacer reserves the
+ * pin exactly where JS will pin, with JS's own fit rule: stage height + the top bar +
+ * fitMargin ≤ 100vh. The spacer's clamp() is that step function (0 when it doesn't fit,
+ * the full pin when it does), so it follows --pin-top-inset (the top bar) by itself.
+ * --seq-stage-h is the stage's measured height per width band (below; JS replaces it with
+ * the live value once mounted). Stage heights don't depend on the viewport height.
+ * Keep in sync (sequence.test.ts): 130px = motion.sequence.perBox, 180px =
+ * motion.sequence.endHold, 24px = motion.sequence.fitMargin, 1280px = pinMinWidth (below
+ * it the Skills rail pins for its slide instead — "Skills rail pin" below).
+ * If Skills copy or layout changes, re-measure the bands (stage getBoundingClientRect
+ * height at each width, rounded up to 0.01px).
+ * --pin-top-inset: the fixed top bar's height; pinned stages stay clear of it. JS reads it
+ * resolved, as the stage's scroll-margin-top.
+ * ------------------------------------------------------------------------- */
+:root {
+  --pin-top-inset: var(--topbar-h, 0px);
+}
+[data-seq] {
+  --seq-per-box: 130px;
+  --seq-end-hold: 180px;
+  --seq-fit-margin: 24px;
+}
+[data-seq-stage] {
+  scroll-margin-top: var(--pin-top-inset);
+}
+[data-seq-line] {
+  transform-origin: center;
+}
+[data-seq-mode='pin'] [data-seq-spacer] {
+  height: calc(var(--seq-count, 0) * var(--seq-per-box) + var(--seq-end-hold));
+}
+[data-seq-mode='pin'] [data-seq-stage] {
+  position: sticky;
+  top: calc(var(--pin-top-inset) + min(max(0px, (100vh - var(--pin-top-inset) - var(--seq-stage-h, 0px)) / 2), var(--seq-clear, 100vh)));
+}
+@media (min-width: 1280px) and (prefers-reduced-motion: no-preference) {
+  html.js [data-seq-mode='auto'] [data-seq-spacer] {
+    height: clamp(
+      0px,
+      (100vh - var(--pin-top-inset) - var(--seq-fit-margin) - var(--seq-stage-h, 100vh) + 0.001px) * 100000,
+      var(--seq-count, 0) * var(--seq-per-box) + var(--seq-end-hold)
+    );
+  }
+  html.js [data-seq-mode='auto'] [data-seq-stage] {
+    position: sticky;
+    top: calc(var(--pin-top-inset) + min(max(0px, (100vh - var(--pin-top-inset) - var(--seq-stage-h, 0px)) / 2), var(--seq-clear, 100vh)));
+  }
+}
+/* Measured stage heights (px, incl. the closing line + its 30px gap) per width band, ascending (later bands win). */
+@media (min-width: 1280px) { [data-seq='skills'] { --seq-stage-h: 428.05px; } }
+@media (min-width: 1327px) { [data-seq='skills'] { --seq-stage-h: 429.05px; } }
+@media (min-width: 1414px) { [data-seq='skills'] { --seq-stage-h: 430.05px; } }
+@media (min-width: 1464px) { [data-seq='skills'] { --seq-stage-h: 391.80px; } }
+@media (min-width: 1728px) { [data-seq='skills'] { --seq-stage-h: 353.55px; } }
+
+/* ---------------------------------------------------------------------------
+ * Skills rail pin (useRail `pin` mode with motion.skillsRail; Skills.tsx). Where the five
+ * cards don't fit between the gutters (md–1279px) page scroll slides the rail, as in
+ * Projects: the stage ([data-seq-stage]) sticks centred below the top bar and the track's
+ * spacer reserves the pin — the slide (--rail-slide) from the later of the section top and
+ * the pin start (hence the max() term: sticky top minus --rail-lead, the track's offset
+ * below the section top), then the end hold. The reveal sequence scrubs unpinned here.
+ * JS measures --rail-slide / --rail-stage-h / --rail-lead; the defaults below are the same
+ * numbers from the design widths, so the prerendered page (html.js, before hydration)
+ * already reserves the pin, with JS's fit rule (stage + top bar + fitMargin ≤ 100vh; the
+ * clamp() step, as in the reveal sequence). The rail's own snap row at scrollLeft 0 is
+ * the pin at progress 0.
+ * Keep in sync (rail.test.ts): 1.3 = motion.skillsRail.scrollPerPx, 64px = endHold,
+ * 24px = fitMargin, 768px = pinMinWidth, 1280px = sequence.pinMinWidth (where all five
+ * fit: 5 × 212 + 4 × 16 + 2 × 64 = 1252), 248px / 16px = the md card width / gap
+ * (.skills-rail), 80px = the section's md:pt-20. --rail-stage-h: measured stage height
+ * per width band (below; stage getBoundingClientRect height, rounded up to 0.01px).
+ * `stack` (reduced motion, md+) and no JS: the cards wrap, all visible.
+ * ------------------------------------------------------------------------- */
+[data-skills-mode] {
+  --rail-slide: calc((var(--rail-count, 5) * 248px + (var(--rail-count, 5) - 1) * 16px + 2 * var(--gutter) - 100vw) * 1.3);
+  --rail-end-hold: 64px;
+  --rail-lead: 80px;
+  --rail-top: calc(var(--pin-top-inset) + max(0px, (100vh - var(--pin-top-inset) - var(--rail-stage-h, 0px)) / 2));
+  --rail-pin: calc(var(--rail-slide) + var(--rail-end-hold) + max(0px, var(--rail-top) - var(--rail-lead)));
+}
+[data-skills-mode='pin'] {
+  overflow-x: clip;
+}
+[data-skills-mode='pin'] [data-seq-stage] {
+  position: sticky;
+  top: var(--rail-top);
+}
+[data-skills-mode='pin'] [data-seq-spacer] {
+  height: var(--rail-pin);
+}
+[data-skills-mode='pin'] .skills-rail {
+  overflow: visible;
+  scroll-snap-type: none;
+  will-change: transform;
+}
+@media (min-width: 768px) and (max-width: 1279.98px) and (prefers-reduced-motion: no-preference) {
+  html.js [data-skills-mode='swipe'] {
+    overflow-x: clip;
+  }
+  html.js [data-skills-mode='swipe'] [data-seq-stage] {
+    position: sticky;
+    top: var(--rail-top);
+  }
+  html.js [data-skills-mode='swipe'] [data-seq-spacer] {
+    height: clamp(0px, (100vh - var(--pin-top-inset) - 24px - var(--rail-stage-h, 100vh) + 0.001px) * 100000, var(--rail-pin));
+  }
+}
+/* Measured stage heights (px, incl. the closing line + its 30px gap) with the cards at 248px, per width band. */
+@media (min-width: 768px) { [data-skills-mode] { --rail-stage-h: 427.65px; } }
+@media (min-width: 864px) { [data-skills-mode] { --rail-stage-h: 428.65px; } }
+@media (min-width: 948px) { [data-skills-mode] { --rail-stage-h: 429.65px; } }
+@media (min-width: 1024px) { [data-skills-mode] { --rail-stage-h: 429.05px; } }
+@media (min-width: 1031px) { [data-skills-mode] { --rail-stage-h: 430.05px; } }
+@media (min-width: 1114px) { [data-skills-mode] { --rail-stage-h: 431.05px; } }
+@media (min-width: 1237px) { [data-skills-mode] { --rail-stage-h: 432.05px; } }
+[data-skills-mode='stack'] .skills-rail,
+html:not(.js) .skills-rail {
+  flex-wrap: wrap;
+  overflow: visible;
+  scroll-snap-type: none;
+}

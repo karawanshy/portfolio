@@ -1,0 +1,40 @@
+/* ---------------------------------------------------------------------------
+ * Without JavaScript (<html> lacks .js, set by an inline script in index.html):
+ * the project cards stack so all are fully visible, JS-only controls hide.
+ * ------------------------------------------------------------------------- */
+html:not(.js) [data-project-rail] {
+  flex-direction: column;
+  align-items: flex-start;
+  overflow: visible;
+}
+html:not(.js) [data-project-rail] > li > article {
+  width: min(720px, calc(100vw - 2 * var(--gutter)));
+}
+/* lg+: each card at its design width (Hasoub, the lead card, is the widest). */
+@media (min-width: 1024px) {
+  html:not(.js) [data-project-rail] > li > article {
+    width: min(calc(var(--card-w, 720) * 1px), calc(100vw - 2 * var(--gutter)));
+  }
+}
+/* Wide enough for all cards side by side: the same fitted row as JS `fit` mode
+ * (2117px ↔ motion.rail.minTravel, see Projects.tsx). */
+@media (min-width: 2117px) {
+  html:not(.js) [data-project-rail] {
+    flex-direction: row;
+  }
+  html:not(.js) [data-project-rail] > li > article {
+    width: 100%;
+  }
+}
+/* Phone menu without JS: a link button that opens a static menu via :target. */
+html:not(.js) [data-menu-fallback] {
+  display: flex;
+}
+html:not(.js) [data-menu-fallback-panel]:target {
+  display: block;
+}
+html:not(.js) [data-project-hint],
+html:not(.js) [data-project-progress-row],
+html:not(.js) [data-menu-button] {
+  display: none;
+}

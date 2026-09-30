@@ -1,0 +1,245 @@
+/*
+ * Story text over the sky. Small labels (12px) carry a soft dark chip so they keep
+ * 4.5:1 over every sky, including the horizon glow; on dark sky it is barely visible.
+ * On phones the text blocks get a soft scrim instead of dimming the whole lower
+ * stage, so the sun stays clear wherever no text crosses it.
+ */
+@layer components {
+  .story-label-chip {
+    display: inline-block;
+    margin: -3px -10px;
+    padding: 3px 10px;
+    border-radius: 999px;
+    background: var(--story-label-scrim);
+    box-shadow: 0 0 14px 6px var(--story-label-scrim);
+  }
+  @media (max-width: 1023.98px) {
+    .story-text-block {
+      position: relative;
+      isolation: isolate;
+    }
+    .story-text-block::before {
+      content: '';
+      position: absolute;
+      z-index: -1;
+      inset: -44px -36px;
+      /* Soft oval: full strength behind the text, fading out well beyond it (no box edge). */
+      background: radial-gradient(farthest-side, var(--story-text-scrim) 62%, transparent);
+      pointer-events: none;
+    }
+  }
+}
+
+/*
+ * Story on landscape phones (short and wide, below desktop): the text beside the art, as on
+ * desktop, so a pinned scene's heading and art share the ~230px frame instead of stacking.
+ * (Scene.tsx: [data-scene-column] / [data-board-grid]; type is compacted in tokens.css.)
+ * ch 3 and ch 6 use their wide layouts (the landscape board, the diagonal chess pair).
+ */
+@media (max-width: 1023.98px) and (max-height: 500px) and (orientation: landscape) {
+  /* Only with art beside the text (ch 18 has none: its words keep the full width). */
+  [data-scene-column]:has(> [data-scene-lane]) {
+    display: grid;
+    /* Wide enough on the text side for both controls on one row from ~800px. */
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.7fr);
+    grid-template-rows: auto auto auto 1fr;
+    column-gap: 28px;
+    row-gap: 12px;
+    align-items: start;
+  }
+  [data-scene-column] > * {
+    grid-column: 1;
+  }
+  [data-scene-column] > [data-scene-lane] {
+    grid-column: 2;
+    grid-row: 1 / span 4;
+    align-self: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 0;
+  }
+  [data-board-grid] {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
+    column-gap: 28px;
+    row-gap: 12px;
+  }
+  [data-board-grid] > [data-scene-visual='board'] {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    max-width: none;
+  }
+  [data-board-grid] > :last-child {
+    grid-column: 1 / -1;
+  }
+  [data-board-layout='portrait'],
+  svg[data-scene-part='chess'][data-layout='v'] {
+    display: none;
+  }
+  [data-board-layout='landscape'],
+  svg[data-scene-part='chess'][data-layout='h'] {
+    display: block;
+  }
+  [data-illus='chess'] {
+    max-width: 340px;
+  }
+}
+
+/*
+ * Story on portrait phones: per-chapter art placement (Scene.tsx / SceneVisual.tsx hooks).
+ * Every pinned chapter's topmost label sits at a set share of the viewport height
+ * (motion.story.pin.phone); these rules size and place the art inside each chapter's column.
+ * The art's own box ([data-scene-visual]) takes no transform here (the pin fit may scale it
+ * inline): right-aligned art only sets where that scaling is anchored.
+ */
+@media (max-width: 767.98px) and (orientation: portrait) {
+  /* ch 2: the stage about a tenth larger than the pin fit used to leave it (~174px at 390),
+     right-aligned, and the quote closer under it. */
+  [data-illus='stage'] {
+    width: 60%;
+    margin-left: auto;
+    margin-right: -4px;
+  }
+  [data-scene-visual='stage'] {
+    transform-origin: 100% 0 !important;
+  }
+  #chapter-2 [data-scene-lane] > [data-scene-part='quote'] {
+    margin-top: 0;
+  }
+
+  /* ch 3: the board to the right. */
+  [data-board-grid] > [data-scene-visual='board'] {
+    justify-self: end;
+    margin-right: -4px;
+    transform-origin: 100% 0 !important;
+  }
+
+  /* ch 5: the CPU on the right and the quote beside it on the left, level with it. */
+  #chapter-5 [data-scene-lane] {
+    flex-direction: row-reverse;
+    align-items: center;
+    gap: 6px;
+  }
+  #chapter-5 [data-scene-visual='cpu'] {
+    flex: 0 0 49.5%;
+    margin-right: -4px;
+    transform-origin: 100% 50% !important;
+  }
+  #chapter-5 [data-scene-lane] > [data-scene-part='quote'] {
+    flex: 1 1 0;
+    align-self: center;
+    min-width: 0;
+    margin-top: 0;
+  }
+
+  /* ch 6: the mirrored pair (Chess.tsx `mirrored`), right-aligned: board a upper right, board b
+     lower left; the quote under it. */
+  #chapter-6 {
+    /* The pair's width (the pin fit scales it down where the frame is short, about board b's top). */
+    /* …at most the column (100vw − 56px − 16px) less 40px, so the raise below always matches it. */
+    --chess-w: min(267px, 100vw - 112px);
+  }
+  [data-illus='chess'] {
+    max-width: none;
+  }
+  [data-scene-visual='chessboard'] {
+    width: var(--chess-w);
+    margin-left: auto;
+    /* If the pin fit scales it, about board b's top (useStoryScenes reads --fit-origin-y). */
+    --fit-origin-y: 0.44;
+    transform-origin: 100% 44% !important;
+  }
+
+  /* ch 7: the door at the size the pin fit used to give it at 390 (0.9). */
+  [data-illus='door'] {
+    width: 90%;
+    margin-inline: auto;
+  }
+
+  /* ch 11, 13: the (left-aligned) building's box only as wide as the building (not the column),
+     so it can sit lower beside the sun's columns; ch 13's a touch left, clear of them. */
+  [data-scene-visual='window'],
+  [data-scene-visual='windows-dark'] {
+    max-width: 100%;
+    transform-origin: 0 0 !important;
+  }
+  [data-scene-visual='window'] {
+    width: 200px;
+  }
+  [data-scene-visual='windows-dark'] {
+    width: 230px;
+    margin-left: -6px;
+  }
+
+  /* ch 4: the route and its 99 centred on the screen, not the text column (which the chapter
+     mark's gutter offsets: 40px left, 16px right); its first stretch fades in, so a touch more. */
+  [data-scene-visual='waver'] {
+    margin-left: -22px;
+    margin-right: 22px;
+  }
+  /* ...and its quote centred under it, on the same axis. */
+  #chapter-4 [data-scene-lane] > [data-scene-part='quote'] {
+    margin-left: -22px;
+    margin-right: 22px;
+    text-align: center;
+  }
+
+  /* ch 8: the workbench and its quote a little lower under the text. */
+  #chapter-8 [data-scene-lane] {
+    margin-top: 10px;
+  }
+
+  /* ch 10: the six days a fifth smaller, centred. */
+  [data-illus='days'] {
+    width: 80%;
+    margin-inline: auto;
+  }
+
+  /* ch 12: the failure field about a third smaller than the pin fit used to leave it (~230px). */
+  [data-scene-visual='field'] > div {
+    max-width: 156px;
+    margin-inline: auto;
+  }
+
+  /* ch 15: the hub larger than the pin fit used to leave it (~190px at 390),
+     right-aligned into the right-hand margin. */
+  [data-illus='hub'] {
+    width: 225px;
+    margin-left: auto;
+    margin-right: -4px;
+  }
+  [data-scene-visual='hub'] {
+    transform-origin: 100% 0 !important;
+  }
+
+  /* ch 17: the quote close under the doorway (over the faint end of its light spill, which hangs
+     out of the art's box), so it sits higher, off the sunrise glow
+     (motion.story.pin.phone.horizonAirFor). */
+  [data-illus='doorway'] {
+    margin-bottom: -20px;
+  }
+  #chapter-17 [data-scene-lane] > [data-scene-part='quote'] {
+    margin-top: 8px;
+  }
+}
+/* ch 6 with JS (without it the controls are a disclosure the boards mustn't cover): the controls
+   stacked on the left, and board a raised beside them, next to "Dive into the engineering". */
+@media (max-width: 767.98px) and (orientation: portrait) {
+  html.js #chapter-6 [data-scene-part='controls'] {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  html.js #chapter-6 [data-scene-lane] {
+    /* Board b's top (146/410 of the pair's width down: chessData.test.ts) sits 12px below the
+       controls (82px, plus the column's 16px gap above the pair), plus ~1px its tilt takes. */
+    margin-top: calc(-1px - var(--chess-w) * 0.356);
+  }
+}
+/* Narrow phones: a smaller pair, so board b (below the controls) and the quote (above the sun)
+   both fit the frame under the heading. */
+@media (max-width: 369.98px) and (orientation: portrait) {
+  #chapter-6 {
+    --chess-w: 160px;
+  }
+}

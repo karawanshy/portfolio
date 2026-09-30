@@ -1,0 +1,57 @@
+/* Self-hosted font faces: the ◒ separator subset and metric-matched fallbacks. */
+
+/*
+ * ◒ ribbon separator: Unbounded has no U+25D2, and system fallbacks vary by OS.
+ * A 2.5 KB single-glyph subset of Noto Sans Symbols 2 (OFL, see
+ * src/assets/fonts/ribbon-separator.LICENSE.txt) keeps it identical everywhere.
+ */
+@font-face {
+  font-family: 'Ribbon Separator';
+  src: url('../assets/fonts/ribbon-separator.woff2') format('woff2');
+  font-display: block;
+  unicode-range: U+25D2;
+}
+
+/*
+ * Metric-matched fallbacks: while the web fonts load, text is set in a local
+ * Arial scaled to the same advance widths and vertical metrics, so the swap
+ * doesn't re-wrap lines or move content (CLS). Values computed with fontTools
+ * from the fontsource Latin files vs Arial / Arial Bold / Arial Black, on a
+ * sample of the page's own copy. Liberation Sans is Arial-metric-compatible (Linux).
+ */
+@font-face {
+  font-family: 'Onest Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans');
+  font-weight: 100 500;
+  size-adjust: 106.42%;
+  ascent-override: 91.15%;
+  descent-override: 28.66%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Onest Fallback';
+  src: local('Arial Bold'), local('Arial-BoldMT'), local('Liberation Sans Bold');
+  font-weight: 600 900;
+  size-adjust: 101.15%;
+  ascent-override: 95.9%;
+  descent-override: 30.15%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Unbounded Fallback';
+  src: local('Arial'), local('ArialMT'), local('Liberation Sans');
+  font-weight: 100 500;
+  size-adjust: 129.91%;
+  ascent-override: 76.59%;
+  descent-override: 18.86%;
+  line-gap-override: 0%;
+}
+@font-face {
+  font-family: 'Unbounded Fallback';
+  src: local('Arial Black'), local('Arial-Black'), local('Liberation Sans Bold');
+  font-weight: 600 900;
+  size-adjust: 114.93%;
+  ascent-override: 86.58%;
+  descent-override: 21.32%;
+  line-gap-override: 0%;
+}

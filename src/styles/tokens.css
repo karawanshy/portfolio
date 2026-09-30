@@ -1,0 +1,889 @@
+/*
+ * Afterglow design tokens — the single place to tune visual values.
+ *
+ * Source: design/reference/afterglow-{desktop,mobile}.html (exact artboard values),
+ * HANDOFF.md §2. Colors, fonts, radii and shadows live in @theme so Tailwind
+ * generates utilities (bg-ink, text-cream, rounded-panel, shadow-lit, font-display…).
+ * Everything else (gradients, fluid type, surfaces) is a plain custom property on :root.
+ */
+
+@theme {
+  /* ---- Colors ---------------------------------------------------------- */
+  --color-ink: #120812; /* page background, plum-black */
+  --color-pink: #ff3d8b; /* primary accent */
+  --color-pink-light: #ff6fa8; /* satin ribbon sheen stop */
+  --color-coral: #ff6a5c; /* sunset gradient midpoint */
+  --color-tangerine: #ff8a3d; /* warmth, eyebrows */
+  --color-lilac: #b9a3ff; /* reserved for Story links (+ some tags) */
+  --color-peach: #ffb38a; /* fourth accent, small use */
+  --color-cream: #fff1e8; /* primary text */
+  --color-text-2: #e3cfda; /* body text */
+  --color-muted: #b89cae; /* supporting text */
+  --color-deep: #2a0716; /* text on pink/tangerine fills */
+  --color-story-ink: #1d0b33; /* text on the lilac Story pill */
+  --color-chess-dark: #4b3590; /* Story CPU scene */
+  /* Hero About keywords (one solid color each). */
+  --color-kw-lilac: #c4b5ff;
+  --color-kw-tangerine: #f5a05a;
+  --color-kw-pink: #f472a8;
+  /* Hasoub card role line. */
+  --color-role-primary: #f472a8;
+  --color-role-secondary: rgb(249 168 203 / 0.7);
+  --color-plum-surface: rgb(40 16 36); /* dark plum surface (used with alpha) */
+
+  /* ---- Fonts (self-hosted via @fontsource-variable) -------------------- */
+  --font-display: 'Unbounded Variable', 'Unbounded Fallback', 'Arial Black', sans-serif;
+  --font-body: 'Onest Variable', 'Onest Fallback', 'Helvetica Neue', Arial, sans-serif;
+  --font-sans: var(--font-body);
+  --font-mono: var(--font-body); /* no monospace, except the chess phone's clocks (--font-clock) */
+  --font-clock: 'JetBrains Mono', ui-monospace, monospace;
+
+  /* ---- Radii ------------------------------------------------------------ */
+  --radius-panel: var(--r-panel);
+  --radius-stat: var(--r-stat);
+  --radius-project: var(--r-project);
+  --radius-band: var(--r-band);
+  --radius-pill: 999px;
+
+  /* ---- Shadows (lighting instead of borders) ---------------------------- */
+  --shadow-lit: inset 0 1px 0 rgb(255 241 232 / 0.14), 0 30px 60px -30px rgb(0 0 0 / 0.6);
+  --shadow-lit-soft: inset 0 1px 0 rgb(255 241 232 / 0.12);
+  --shadow-chip: inset 0 1px 0 rgb(255 241 232 / 0.08);
+  --shadow-nav: inset 0 1px 0 rgb(255 241 232 / 0.14), 0 20px 40px rgb(0 0 0 / 0.35);
+  --shadow-glow-pink: 0 14px 40px -10px #ff3d8b;
+  --shadow-glow-tangerine: 0 14px 40px -10px #ff8a3d;
+  --shadow-outline-cream: inset 0 0 0 1.5px rgb(255 241 232 / 0.32);
+  --shadow-outline-lilac: inset 0 0 0 1.5px #b9a3ff;
+  --shadow-outline-deep: inset 0 0 0 1.5px var(--color-deep); /* --color-deep hairline (outline buttons on the sunset card) */
+  --shadow-highlight: inset 0 1px 0 rgb(255 241 232 / 0.14); /* top light only */
+  --shadow-card-sunset: 0 40px 80px -30px rgb(255 61 139 / 0.65), inset 0 1px 0 rgb(255 255 255 / 0.35);
+  --shadow-card-lilac: inset 0 1px 0 rgb(255 241 232 / 0.18), 0 40px 80px -30px rgb(120 90 230 / 0.5);
+  --shadow-card-dawn: inset 0 1px 0 rgb(255 241 232 / 0.2), 0 40px 80px -30px rgb(255 90 110 / 0.5);
+  --shadow-story-band: inset 0 1px 0 rgb(255 241 232 / 0.16), inset 0 0 0 1.5px rgb(185 163 255 / 0.35);
+
+  /* ---- Breakpoints (Tailwind defaults kept; lg = desktop layout) -------- */
+  /* Narrowest phones: the Story header's compact chapter label (max-2xs). */
+  --breakpoint-2xs: 340px;
+  /* Small phones: short labels below it (max-xs), full labels from it (xs). */
+  --breakpoint-xs: 380px;
+  /* Every project card fits side by side (Projects.tsx). CSS media queries can't read this:
+     the same 2117px is in portfolio/rails.css and portfolio/no-js.css, and ↔ motion.rail.minTravel. */
+  --breakpoint-rail: 2117px;
+}
+
+/* Map dynamic (responsive) custom properties into Tailwind utilities. */
+@theme inline {
+  --text-hero: var(--fs-hero-name);
+  --text-closing: var(--fs-closing);
+  --text-h2: var(--fs-h2);
+  --text-project: var(--fs-project-title);
+  --text-h3: var(--fs-timeline-title);
+  --text-band: var(--fs-band-title);
+  --text-label: var(--fs-label);
+  --text-lead: var(--fs-lead);
+  --text-body: var(--fs-body);
+  --text-support: var(--fs-support);
+  --text-chip: var(--fs-chip);
+  --spacing-gutter: var(--gutter);
+}
+
+:root {
+  /* ---- Gradients -------------------------------------------------------- */
+  --gradient-main: linear-gradient(100deg, #ff3d8b, #ff8a3d);
+  /* Toned keywords (.keyword-*: hero summary, Story ch 18), gradient text; solid fallback --color-kw-*. */
+  --gradient-kw-lilac: linear-gradient(90deg, var(--color-kw-lilac), #f3a4cf); /* lilac → pink */
+  --gradient-kw-tangerine: linear-gradient(90deg, var(--color-kw-tangerine), #ffcf8a); /* tangerine → gold */
+  --gradient-kw-pink: linear-gradient(90deg, #ec4f8a, var(--color-kw-tangerine)); /* pink → tangerine */
+  --gradient-sunset: linear-gradient(140deg, #ff3d8b 0%, #ff6a5c 50%, #ff8a3d 100%);
+  --gradient-sun-mark: linear-gradient(180deg, #ff8a3d, #ff3d8b); /* ◒ vertical fill */
+  --gradient-card-lilac: linear-gradient(160deg, #3a2470, #1e0e20);
+  /* Hasoub (lead project) card: night → dawn, the richest of the three. */
+  --gradient-card-dawn: radial-gradient(75% 95% at 100% 100%, rgb(255 138 61 / 0.55), rgb(255 61 139 / 0.3) 45%, rgb(255 61 139 / 0) 78%),
+    radial-gradient(60% 70% at 88% 0%, rgb(185 163 255 / 0.28), rgb(185 163 255 / 0) 70%),
+    linear-gradient(155deg, #2b1856 0%, #1c0d30 55%, #2a0f2c 100%);
+  --gradient-story-orb: linear-gradient(135deg, #b9a3ff, #ff3d8b);
+  /* Top bar Story pill (TopBar.tsx StoryPill): lilac fill, a static glow behind it, a small
+     leading orb and a glass sheen band sweeping across (timing: motion.storySheen). */
+  --gradient-story-pill: linear-gradient(110deg, #c9b6ff, #b9a3ff 45%, #ff8fc0);
+  --shadow-story-pill: inset 0 1px 0 rgb(255 255 255 / 0.45), 0 14px 40px -10px rgb(185 163 255 / 0.9);
+  --story-pill-glow: radial-gradient(closest-side, rgb(185 163 255 / 0.85), rgb(255 111 168 / 0.5) 60%, transparent);
+  --story-pill-orb: linear-gradient(135deg, #2b1856, #ff3d8b);
+  --story-sheen: linear-gradient(105deg, transparent 20%, rgb(255 255 255 / 0.65) 50%, transparent 80%);
+  --gradient-page-base: linear-gradient(
+    180deg,
+    #1c0a18 0%,
+    #120812 22%,
+    #100a1c 55%,
+    #140816 80%,
+    #120812 100%
+  );
+
+  --gradient-timeline: linear-gradient(180deg, #ff3d8b, #ff8a3d 35%, #b9a3ff 75%, rgb(185 163 255 / 0));
+  --gradient-sunrise: radial-gradient(closest-side, rgb(255 138 61 / 0.55), rgb(255 61 139 / 0.35) 45%, rgb(18 8 18 / 0) 100%);
+  /* Hero: soft sunrise glow behind the portrait (heroGeometry.glow) — the sunrise look, quieter. */
+  --gradient-hero-glow: radial-gradient(closest-side, rgb(255 138 61 / 0.35), rgb(255 61 139 / 0.22) 45%, transparent 100%);
+
+  /* Horizon lines: 2px, fading out at both ends. One per section ending. */
+  --horizon-tangerine-pink: linear-gradient(90deg, transparent, #ff8a3d 30%, #ff3d8b 70%, transparent);
+  --horizon-pink-lilac: linear-gradient(90deg, transparent, #ff3d8b 30%, #b9a3ff 70%, transparent);
+  --horizon-lilac-tangerine: linear-gradient(90deg, transparent, #b9a3ff 30%, #ff8a3d 70%, transparent);
+
+  /* ---- Surfaces --------------------------------------------------------- */
+  --menu-fill: linear-gradient(160deg, rgb(62 24 58 / 0.98), rgb(30 14 32 / 0.98));
+  --skill-panel-end: rgb(30 14 32 / 0.9); /* skill panels: accent wash (15%) → this */
+  --story-band-fill: radial-gradient(90% 140% at 0% 50%, rgb(185 163 255 / 0.35), rgb(30 14 32 / 0.95) 60%), rgb(30 14 32 / 0.95);
+  --ribbon-sheen: rgb(255 255 255 / 0.28);
+  --nav-fill: rgb(40 16 36 / 0.72);
+  /* Portfolio top bar once the page scrolls: page ink, translucent + blurred, hairline below. */
+  --topbar-fill: color-mix(in srgb, var(--color-ink) 74%, transparent);
+  --topbar-blur: blur(14px) saturate(1.2);
+  --topbar-line: inset 0 -1px 0 rgb(255 241 232 / 0.07);
+  /* Top bar height — the ONE source: TopBar sets its height from it; anchor jumps
+     (scroll-padding-top) and pinned sections (--pin-top-inset) read it. md/lg below. */
+  --topbar-h: 78px;
+  --pill-fill: rgb(40 16 36 / 0.75);
+  --chip-fill: rgb(255 241 232 / 0.07);
+  --chip-fill-bright: rgb(255 241 232 / 0.08);
+  --chip-fill-on-pink: rgb(42 7 22 / 0.14);
+  --chip-fill-on-lilac: rgb(185 163 255 / 0.16);
+  /* Hasoub card: leadership beats (tangerine-lit pills) and the no-JS details well. */
+  --beat-fill: rgb(255 138 61 / 0.14);
+  --beat-outline: inset 0 0 0 1px rgb(255 138 61 / 0.5);
+  --details-fill: rgb(18 8 18 / 0.35);
+  /* Hasoub card visual: actor nodes on a lifecycle ring around the ◒ hub. */
+  --actor-node-fill: #1d0f33;
+  --actor-node-edge: rgb(255 241 232 / 0.55);
+  --actor-spoke: rgb(255 61 139 / 0.7);
+  /* Project details dialog (Portfolio). */
+  --project-sheet-fill: linear-gradient(160deg, rgb(46 24 74 / 0.98), rgb(26 12 34 / 0.98));
+  --project-scrim: rgb(12 5 14 / 0.72);
+  --story-fill: rgb(185 163 255 / 0.1);
+  --grain-opacity: 0.05;
+  /*
+   * Light-pool field height: pools sit at % of this FIXED height (≈ the page height
+   * per layout), never of the live page height — so a font swap or late layout
+   * change can't move them (that was a 0.24+ CLS on phones).
+   */
+  --pool-field-h: 5300px;
+
+  /* Time of day (fixed sky overlays; only their opacity changes with scroll) */
+  --tod-night: linear-gradient(180deg, rgb(8 6 26 / 0.5), rgb(14 10 40 / 0.34) 55%, rgb(8 6 26 / 0.46)),
+    radial-gradient(70% 50% at 80% 20%, rgb(120 100 230 / 0.1), rgb(120 100 230 / 0) 70%);
+  --tod-dawn: radial-gradient(90% 60% at 50% 105%, rgb(255 138 61 / 0.3), rgb(255 61 139 / 0.14) 45%, rgb(255 61 139 / 0) 75%);
+
+  /* Motion: custom cursor, panel edge light, card gloss, touch tap glow */
+  --cursor-orb: radial-gradient(closest-side, rgb(255 236 214 / 0.95), rgb(255 160 110 / 0.55) 45%, rgb(255 90 120 / 0) 100%);
+  --cursor-pill-ring: 0 0 0 1.5px rgb(255 214 186 / 0.6), 0 0 22px 2px rgb(255 110 110 / 0.45),
+    inset 0 0 14px rgb(255 170 120 / 0.18);
+  --cursor-pill-fill: rgb(255 170 120 / 0.06);
+  --panel-edge-light: radial-gradient(50% 100% at 50% 0%, rgb(255 196 160 / 0.26), rgb(255 150 120 / 0) 100%),
+    linear-gradient(90deg, rgb(255 230 210 / 0), rgb(255 230 210 / 0.75), rgb(255 230 210 / 0)) top / 100% 1.5px no-repeat;
+  --card-gloss: linear-gradient(105deg, rgb(255 255 255 / 0) 35%, rgb(255 255 255 / 0.22) 50%, rgb(255 255 255 / 0) 65%);
+  --tap-glow: drop-shadow(0 0 14px rgb(255 120 100 / 0.55));
+
+  /* Font for the ◒ ribbon separator (Unbounded has no U+25D2 glyph). */
+  --font-ribbon-separator: 'Ribbon Separator', var(--font-display);
+
+  /* Glow helpers */
+  --glow-stat: 0 0 18px; /* text-shadow blur for stat numbers (+ color at 50%); 26px from md */
+  /* Inline stat figures in running text (.stat-figure: "150+", "600+"…): gradient text + a soft tangerine glow. */
+  --stat-fill: linear-gradient(100deg, var(--color-peach), var(--color-tangerine) 45%, var(--color-pink));
+  --stat-fallback: var(--color-tangerine); /* solid fill where background-clip: text is unsupported */
+  --stat-glow: drop-shadow(0 0 12px rgb(255 138 61 / 0.55));
+  --focus-ring: #ff3d8b;
+
+  /* ---- Radii (mobile → desktop overrides below) ------------------------- */
+  --r-panel: 30px;
+  --r-stat: 26px;
+  --r-project: 36px;
+  --r-band: 44px;
+
+  /* ---- Layout ----------------------------------------------------------- */
+  --gutter: 16px;
+  --content-max: 1440px;
+
+  /* ---- Fluid type scale -------------------------------------------------
+   * Each role is two unitless px numbers: <role>-min at 390px wide, <role>-max
+   * at 1440px wide. Tune a size by changing only these numbers.
+   */
+  --vp-min: 390;
+  --vp-max: 1440;
+
+  --hero-name-min: 36;
+  --hero-name-max: 96;
+  --closing-min: 40;
+  --closing-max: 72;
+  --h2-min: 26;
+  --h2-max: 38;
+  --project-title-min: 22;
+  --project-title-max: 28;
+  --timeline-title-min: 17;
+  --timeline-title-max: 20;
+  --band-title-min: 24;
+  --band-title-max: 32;
+  --lead-min: 16;
+  --lead-max: 20;
+
+  --fs-hero-name: clamp(
+    calc(var(--hero-name-min) * 1px),
+    calc(var(--hero-name-min) * 1px + (var(--hero-name-max) - var(--hero-name-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--hero-name-max) * 1px)
+  );
+  --fs-closing: clamp(
+    calc(var(--closing-min) * 1px),
+    calc(var(--closing-min) * 1px + (var(--closing-max) - var(--closing-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--closing-max) * 1px)
+  );
+  --fs-h2: clamp(
+    calc(var(--h2-min) * 1px),
+    calc(var(--h2-min) * 1px + (var(--h2-max) - var(--h2-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--h2-max) * 1px)
+  );
+  --fs-project-title: clamp(
+    calc(var(--project-title-min) * 1px),
+    calc(var(--project-title-min) * 1px + (var(--project-title-max) - var(--project-title-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--project-title-max) * 1px)
+  );
+  --fs-timeline-title: clamp(
+    calc(var(--timeline-title-min) * 1px),
+    calc(var(--timeline-title-min) * 1px + (var(--timeline-title-max) - var(--timeline-title-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--timeline-title-max) * 1px)
+  );
+  --fs-band-title: clamp(
+    calc(var(--band-title-min) * 1px),
+    calc(var(--band-title-min) * 1px + (var(--band-title-max) - var(--band-title-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--band-title-max) * 1px)
+  );
+  --fs-lead: clamp(
+    calc(var(--lead-min) * 1px),
+    calc(var(--lead-min) * 1px + (var(--lead-max) - var(--lead-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--lead-max) * 1px)
+  );
+
+  /* Fixed-size roles (mobile values; desktop overrides below) */
+  --fs-label: 12px; /* Unbounded 700, uppercase, 0.16em, tangerine */
+  --fs-project-role: 18px; /* Hasoub role line; 22px from md */
+  --fs-body: 15px;
+  --fs-support: 13px;
+  --fs-chip: 13px;
+  --fs-section-number: 16px;
+
+  /* Fixed UI sizes (not fluid, not role-bound): buttons, nav, menus, small captions, the
+     project illustrations' tiny labels. Use as text-(length:--fs-ui-md): font-size only,
+     so each element keeps its own line-height. */
+  --fs-ui-4xs: 9px;
+  --fs-ui-3xs: 9.5px;
+  --fs-ui-2xs: 11px;
+  --fs-ui-xs: 12px;
+  --fs-ui-sm: 13px;
+  --fs-ui-md: 14px;
+  --fs-ui-base: 15px;
+  --fs-ui-lg: 16px;
+  --fs-ui-xl: 17px;
+  --fs-ui-2xl: 18px;
+  --fs-ui-3xl: 20px;
+  --fs-ui-4xl: 22px;
+
+  /* Letter-spacing / line-height for the statement moments */
+  --ls-statement: -0.05em;
+  --ls-hero-name: -0.055em;
+  --lh-hero-name: 0.9;
+  --ls-h2: -0.035em;
+  --ls-label: 0.16em;
+
+  /* ---- Project illustrations (decorative) ------------------------------- */
+  /* Habit Tracker: weekly multi-habit panel (HabitWeekIllustration). */
+  --habit-panel-bg: rgb(42 15 28 / 0.92);
+  --habit-panel-shadow: 0 16px 36px rgb(60 5 25 / 0.35);
+  --habit-ink: #fff4ea;
+  --habit-muted: rgb(255 244 234 / 0.45);
+  --habit-empty: rgb(255 244 234 / 0.1);
+  --habit-today: rgb(255 244 234 / 0.5);
+  --habit-read: #ff4f8b;
+  --habit-workout: #ff9d52;
+  --habit-water: #c4b5ff;
+  --habit-journal: #fff4ea;
+
+  /* Multiplayer Chess: Android phone mid-game (ChessPhoneIllustration). */
+  --phone-bezel: #0f0a1d;
+  --phone-screen: #1a1030;
+  --phone-shadow: 0 0 0 1.5px rgb(196 181 255 / 0.4), 0 22px 44px rgb(0 0 0 / 0.5);
+  --phone-opponent-bar: rgb(244 114 168 / 0.14);
+  --phone-opponent: #f472a8;
+  --phone-opponent-clock: #f9a8cb;
+  --phone-you-bar: rgb(196 181 255 / 0.16);
+  --phone-you: #c4b5ff;
+  --phone-you-clock: #e9e2ff;
+  --phone-action-fill: #c4b5ff;
+  --phone-action-ink: #1f1535;
+  --phone-action-outline: rgb(196 181 255 / 0.45);
+  --board-light: #e9e2ff;
+  --board-dark: #5b3f9e;
+  --board-move-from: #f7c49a;
+  --board-move-to: #f5a05a;
+  --board-piece: #1c1233;
+  --font-chess-glyphs: 'Segoe UI Symbol', 'Apple Symbols', 'DejaVu Sans', serif;
+}
+
+/* ---------------------------------------------------------------------------
+ * Story (/story) — "The long way to morning"
+ * One sky keyframe per act (storyContent.ts → skyKeyframes). Each keyframe has a
+ * zenith/mid/horizon ramp and a glow pooled around the sun (whose state is per chapter).
+ * Tints are derived from the Portfolio palette; lilac carries the night.
+ * The composed `--sky-<id>` is what StoryStage paints; S2 motion crossfades them.
+ * ------------------------------------------------------------------------- */
+:root {
+  /* Stage geometry (fraction of the viewport height / width). The horizon is in svh (the viewport
+     with a phone's toolbars shown): the stage is lvh tall, so it stays put as they slide away. */
+  /* Phones/tablets: low, but never into the bottom fog behind the progress rail (short phones). */
+  --story-horizon-y: min(91svh, calc(100svh - 76px));
+  --story-sun-x: 80%;
+  --story-sun-size: 64px;
+  /* The sun (StoryStage; its state per chapter: motion.story.sun, mapped in global.css).
+     Height −1 sinks it by --story-sun-sink (its radius: fully below the horizon); height 1 lifts
+     it by --story-sun-rise and drifts it by --story-sun-drift (reached by height
+     --story-sun-drift-by). Brightness sets the disc's opacity over its horizon-coloured
+     occluder (from --story-sun-disc-min: dull, never see-through), the halo's (from
+     --story-sun-halo-min) and the glow's; the halo blooms by --story-sun-bloom once the height
+     passes --story-sun-bloom-from, and the horizon flare shows above brightness --story-sun-flare-from.
+     The sun stays in its place (the half-sun on the horizon): sink, rise and drift are 0, so the
+     progress reads through its brightness and the sky only. */
+  --story-sun-sink: 0px;
+  --story-sun-rise: 0px;
+  --story-sun-drift: 0px;
+  --story-sun-drift-by: 0.25;
+  --story-sun-disc-min: 0.3;
+  --story-sun-halo-min: 0.15;
+  --story-sun-glow-min: 0.35;
+  --story-sun-bloom: 0.55;
+  --story-sun-bloom-from: 0.4;
+  --story-sun-flare-from: 0.6;
+  /* The disc: the ◒'s fill on its upper half (so at height 0 it IS the ◒), warm below. */
+  --story-sun-disc: linear-gradient(180deg, #ff8a3d 0%, #ff3d8b 50%, #ff5a6e 100%);
+  --story-sun-full-glow: 0 0 36px 6px rgb(255 138 61 / 0.45), 0 0 90px 20px rgb(255 61 139 / 0.22);
+  --story-sun-flare: radial-gradient(closest-side, rgb(255 238 218 / 0.97), rgb(255 196 150 / 0.8) 22%, rgb(255 138 61 / 0.38) 50%, rgb(255 61 139 / 0.1) 76%, rgb(255 61 139 / 0) 100%);
+  --story-ground-top: #150a16;
+  --story-ground-bottom: #0a050b;
+  --story-horizon-line: linear-gradient(90deg, transparent, rgb(255 138 61 / 0.55) 30%, rgb(255 61 139 / 0.7) 60%, transparent);
+  /* Ch 18's paper boat on the stage's sea (StoryStage; motion.story.boat): its box's width near
+     the viewer, where it rests at the end (far out, on the horizon, left of the sun) and its scale
+     there. The paper is the ch 7 applications' (--illus-paper*). */
+  --story-boat-size: 190px;
+  --story-boat-x: 58%;
+  --story-boat-far-scale: 0.32;
+  /* How far down the water it rests near the viewer (0 horizon … 1 the bottom): phones keep it
+     clear of the progress rail and the ending's links. */
+  --story-boat-depth: 0.3;
+
+  /* Dusk — prologue */
+  --sky-dusk-zenith: #150813;
+  --sky-dusk-mid: #2a0f26;
+  --sky-dusk-horizon: #5a1a3c;
+  --sky-dusk-glow: rgb(255 106 92 / 0.34);
+  --sky-dusk-stars: 0.35;
+  --sky-dusk-haze: rgb(255 106 92 / 0.28);
+  /* Golden hour — I */
+  --sky-golden-zenith: #1c0b13;
+  --sky-golden-mid: #3b1520;
+  --sky-golden-horizon: #86352c;
+  --sky-golden-glow: rgb(255 138 61 / 0.46);
+  --sky-golden-stars: 0;
+  --sky-golden-haze: rgb(255 138 61 / 0.34);
+  /* Warm — II, ch 3 (the classroom: late warm light) */
+  --sky-warm-zenith: #1a0b17;
+  --sky-warm-mid: #3a1526;
+  --sky-warm-horizon: #7c3336;
+  --sky-warm-glow: rgb(255 138 61 / 0.42);
+  --sky-warm-stars: 0.15;
+  --sky-warm-haze: rgb(255 138 61 / 0.3);
+  /* Lilac — II, ch 5 (the act has cooled) */
+  --sky-lilac-zenith: #0f0a22;
+  --sky-lilac-mid: #221640;
+  --sky-lilac-horizon: #4a3a78;
+  --sky-lilac-glow: rgb(185 163 255 / 0.32);
+  --sky-lilac-stars: 0.45;
+  --sky-lilac-haze: rgb(185 163 255 / 0.28);
+  /* Cooling — II, ch 4 (transitional: warm horizon under a lilac sky) */
+  --sky-cooling-zenith: #120a20;
+  --sky-cooling-mid: #2a1538;
+  --sky-cooling-horizon: #6a3a5e;
+  --sky-cooling-glow: rgb(255 179 138 / 0.28);
+  --sky-cooling-stars: 0.3;
+  --sky-cooling-haze: rgb(214 150 190 / 0.26);
+  /* Pink evening — III */
+  --sky-evening-zenith: #160817;
+  --sky-evening-mid: #33102d;
+  --sky-evening-horizon: #7a1e4e;
+  --sky-evening-glow: rgb(255 61 139 / 0.4);
+  --sky-evening-stars: 0.35;
+  --sky-evening-haze: rgb(255 61 139 / 0.3);
+  /* Deepest night — IV (lilac dominant) */
+  --sky-night-zenith: #07051a;
+  --sky-night-mid: #110c2c;
+  --sky-night-horizon: #2a2052;
+  --sky-night-glow: rgb(142 120 230 / 0.2);
+  --sky-night-stars: 1;
+  --sky-night-haze: rgb(142 120 230 / 0.2);
+  /* First light — V */
+  --sky-firstlight-zenith: #0b0820;
+  --sky-firstlight-mid: #1d1236;
+  --sky-firstlight-horizon: #4e2740;
+  --sky-firstlight-glow: rgb(255 138 61 / 0.24);
+  --sky-firstlight-stars: 0.6;
+  --sky-firstlight-haze: rgb(255 138 61 / 0.38);
+  /* The detour — VI (dims again, cooler) */
+  --sky-detour-zenith: #09091b;
+  --sky-detour-mid: #15142c;
+  --sky-detour-horizon: #2d2a4c;
+  --sky-detour-glow: rgb(185 163 255 / 0.15);
+  --sky-detour-stars: 0.8;
+  --sky-detour-haze: rgb(185 163 255 / 0.16);
+  /* Sunrise — VII */
+  --sky-sunrise-zenith: #1a0b20;
+  --sky-sunrise-mid: #4a1a3a;
+  --sky-sunrise-horizon: #b04a3a;
+  --sky-sunrise-glow: rgb(255 179 138 / 0.55);
+  --sky-sunrise-stars: 0;
+  --sky-sunrise-haze: rgb(255 179 138 / 0.45);
+
+  --sky-dusk: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-dusk-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-dusk-zenith) 0%, var(--sky-dusk-mid) 50%, var(--sky-dusk-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-golden: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-golden-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-golden-zenith) 0%, var(--sky-golden-mid) 50%, var(--sky-golden-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-warm: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-warm-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-warm-zenith) 0%, var(--sky-warm-mid) 50%, var(--sky-warm-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-lilac: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-lilac-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-lilac-zenith) 0%, var(--sky-lilac-mid) 50%, var(--sky-lilac-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-cooling: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-cooling-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-cooling-zenith) 0%, var(--sky-cooling-mid) 50%, var(--sky-cooling-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-evening: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-evening-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-evening-zenith) 0%, var(--sky-evening-mid) 50%, var(--sky-evening-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-night: radial-gradient(70% 50% at 20% 15%, rgb(185 163 255 / 0.1), transparent 70%),
+    radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-night-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-night-zenith) 0%, var(--sky-night-mid) 50%, var(--sky-night-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-firstlight: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-firstlight-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-firstlight-zenith) 0%, var(--sky-firstlight-mid) 55%, var(--sky-firstlight-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-detour: radial-gradient(55% 45% at var(--story-sun-x) var(--story-horizon-y), var(--sky-detour-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-detour-zenith) 0%, var(--sky-detour-mid) 55%, var(--sky-detour-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+  --sky-sunrise: radial-gradient(65% 55% at var(--story-sun-x) var(--story-horizon-y), var(--sky-sunrise-glow), transparent 70%),
+    linear-gradient(180deg, var(--sky-sunrise-zenith) 0%, var(--sky-sunrise-mid) 45%, var(--sky-sunrise-horizon) var(--story-horizon-y), var(--story-ground-top) var(--story-horizon-y), var(--story-ground-bottom) 100%);
+
+  /* Stage art */
+  --story-star: #fff1e8;
+  /* Text over the sky: label chips (all sizes) and the phone text-block scrim (see global.css). */
+  --story-label-scrim: rgb(14 7 16 / 0.66);
+  --story-text-scrim: rgb(14 7 16 / 0.46);
+  --story-sun-halo: radial-gradient(closest-side, rgb(255 138 61 / 0.35), rgb(255 61 139 / 0.14) 55%, rgb(255 61 139 / 0) 100%);
+
+
+  /* ch 3 board */
+  --board-slate-top: #2b1a2c;
+  --board-slate-bottom: #1d1020;
+  --board-fill: linear-gradient(170deg, var(--board-slate-top) 0%, var(--board-slate-bottom) 100%);
+  --board-shadow: inset 0 1px 0 rgb(255 241 232 / 0.14), inset 0 0 0 10px rgb(255 241 232 / 0.04), 0 50px 90px -40px rgb(0 0 0 / 0.8), 0 0 80px -30px rgb(255 138 61 / 0.35);
+  --board-chalk: rgb(255 241 232 / 0.62);
+  --board-chalk-dim: rgb(255 241 232 / 0.22);
+  --board-chalk-line: rgb(255 241 232 / 0.86); /* the handwriting */
+  --board-chalk-peach: rgb(255 179 138 / 0.9); /* accent: the underline */
+  --board-chalk-pink: rgb(255 111 168 / 0.85); /* accent: the circled keyword */
+  --board-dust: rgb(255 241 232 / 0.05); /* old erased chalk, blurred */
+  --board-grain: #24152a; /* chalk dropout specks (≈ the board's own colour) */
+  --board-chalk-stick: #f6e6dc;
+  --board-chalk-stick-shade: rgb(184 156 174 / 0.55);
+  --board-chalk-glow: rgb(255 179 138 / 0.55);
+  --board-ledge: linear-gradient(90deg, rgb(255 241 232 / 0.06), rgb(255 241 232 / 0.16), rgb(255 241 232 / 0.06));
+  --quote-accent: linear-gradient(100deg, #ffb38a, #ff8a3d 40%, #ff3d8b);
+
+  /* ch 6 chess: two boards on two machines, one thread between them */
+  --chess-sq-light: rgb(233 222 255 / 0.3);
+  --chess-sq-dark: rgb(75 53 144 / 0.62);
+  --chess-piece-white: var(--color-cream);
+  --chess-piece-white-edge: rgb(18 8 18 / 0.45);
+  --chess-piece-black: #2a1238;
+  --chess-piece-black-edge: rgb(255 241 232 / 0.6);
+  --chess-accent-a: var(--color-lilac); /* player a (White) */
+  --chess-accent-b: var(--color-tangerine); /* player b (Black) */
+  --chess-highlight-a: rgb(185 163 255 / 0.4);
+  --chess-highlight-b: rgb(255 138 61 / 0.42);
+
+  /* ch 10 six days: the service's slabs (opaque: the path passes behind) */
+  --days-top: rgb(58 32 70);
+  --days-side: rgb(20 10 26);
+
+  /* ch 5 CPU */
+  --cpu-line: rgb(185 163 255 / 0.75);
+  --cpu-line-dim: rgb(185 163 255 / 0.3);
+  --cpu-fill: rgb(185 163 255 / 0.08);
+  --cpu-package: linear-gradient(160deg, rgb(40 24 64 / 0.96), rgb(22 12 32 / 0.96)); /* opaque: the path passes behind */
+  --cpu-spark: #ffb38a;
+
+  /* ch 12 failure field + CI line */
+  --field-fail: #ff3d8b;
+  --field-fail-2: #ff8a3d;
+  /* Passing: a soft luminous jade-mint (slightly teal) — lit, not a neon "success" green. */
+  --field-pass: #6fe3b8;
+  --field-pass-glow: drop-shadow(0 0 5px rgb(111 227 184 / 0.85));
+  /* The batch that just passed: the same green lifted toward cream, a brighter bloom. */
+  --field-fresh: color-mix(in srgb, var(--field-pass) 55%, var(--color-cream));
+  --field-fresh-glow: drop-shadow(0 0 7px rgb(111 227 184 / 1));
+  --field-halo: 0.5; /* ch 12: the frame's green edge once everything passes (stroke opacity) */
+  --field-sweep: rgb(200 255 228); /* ch 12: the pale green light that crosses the field once it passes (motion) */
+  --field-frame: rgb(22 11 28 / 0.9); /* near-opaque: the path passes behind */
+  --field-frame-edge: rgb(255 241 232 / 0.1);
+  --ci-unstable: #ff3d8b;
+  --ci-steady: var(--field-pass); /* steady: the passing green, with presence */
+  --ci-steady-glow: drop-shadow(0 0 9px rgb(111 227 184 / 0.8));
+  --ci-pulse: var(--field-fresh); /* ch 12: the "green build" glint along the healed line (motion) */
+  --ci-track: rgb(255 241 232 / 0.14);
+
+  /* Chapter illustrations (src/story/scenes/): one line-and-fill language for every scene */
+  --illus-fill: rgb(26 13 34 / 0.78); /* dark objects (door, building, car) */
+  --illus-fill-soft: rgb(185 163 255 / 0.08); /* lilac-tinted panels */
+  --illus-line: rgb(255 241 232 / 0.55);
+  --illus-line-dim: rgb(255 241 232 / 0.2);
+  --illus-ground: rgb(255 241 232 / 0.14);
+  --illus-glow-warm: drop-shadow(0 0 10px rgb(255 179 138 / 0.75));
+  --illus-glow-pink: drop-shadow(0 0 10px rgb(255 61 139 / 0.6));
+  --illus-glow-lilac: drop-shadow(0 0 10px rgb(185 163 255 / 0.6));
+  --illus-glow-soft: drop-shadow(0 0 4px rgb(255 179 138 / 0.8));
+  --illus-window-dark: rgb(255 241 232 / 0.06);
+  --illus-window-dim: rgb(255 179 138 / 0.14); /* a room going out */
+  --illus-window-soft: rgb(255 179 138 / 0.42); /* an occupied room, softly lit */
+
+  /*
+   * Solid-object language (ch 1, 2, 7–9, 11, 13, 14, 17, 18): the ch 10 slab faces —
+   * a lit top, a dark side, a plum → ink front — plus top-light edges and soft contact shadows.
+   * Objects are opaque so the global path passes behind them cleanly.
+   */
+  --illus-face-top: rgb(64 36 76); /* top faces: they catch the light */
+  --illus-face-front: rgb(44 22 52); /* front faces (gradient start) */
+  --illus-face-front-2: rgb(24 12 30); /* front faces (gradient end) */
+  --illus-face-side: rgb(18 9 23); /* side faces: in shade */
+  --illus-face-inset: rgb(30 15 37); /* recessed panels */
+  --illus-edge-hi: rgb(255 241 232 / 0.3); /* the top-lit edge of an object */
+  --illus-edge-lo: rgb(6 2 8 / 0.55); /* the shaded edge of a recess */
+  --illus-shadow: rgb(6 2 8); /* contact shadows (used through a fading gradient) */
+  --illus-paper: #f6e7dd; /* applications, pages, the certificate */
+  --illus-paper-shade: #d9c1c2; /* the fold in shade */
+  --illus-paper-edge: #a8878f;
+  --illus-ink-line: rgb(42 7 22 / 0.34); /* writing lines on paper */
+  --illus-light-core: #fff6ec; /* the hottest part of a light */
+  --illus-glass-dark: rgb(34 20 46); /* unlit glass */
+  --illus-brass: #e9a36f; /* door handle */
+  --illus-brass-shade: #8a4a34;
+  /* ch 1 girl: in the dusk until the lights find her (her lit side is an overlay) */
+  --illus-skin: #b77a66;
+  --illus-skin-shade: #7a4a45;
+  --illus-hair: #2e1420;
+  --illus-dress: #8a3d6c;
+  --illus-dress-shade: #4a1d3e;
+  --illus-dress-trim: #f3d9cf;
+  --illus-spot-beam: rgb(255 214 176); /* a glow's spotlight (through a fading gradient) */
+  /* ch 8 kids (drawn like the ch 1 girl): more skin tones, hair and shirts */
+  --illus-skin-2: #d8a487;
+  --illus-skin-2-shade: #a06f5a;
+  --illus-skin-3: #7e5040;
+  --illus-skin-3-shade: #55342b;
+  --illus-hair-2: #5b2f23;
+  --illus-shirt-1: #4d5f9f;
+  --illus-shirt-2: #356b64;
+  --illus-shirt-3: #944740;
+  --illus-shirt-4: #6b4a8c;
+  /* ch 8 teacher: a dark hijab, a dark green tunic, a long skirt */
+  --illus-hijab: #231822;
+  --illus-teacher-top: #2e5646;
+  --illus-teacher-skirt: #3a2438;
+  /* ch 8 builds: a small wheeled robot, a microcontroller board, a 3D-modelled shape on its workplane */
+  --build-lilac-top: color-mix(in srgb, var(--color-lilac) 65%, white);
+  --build-lilac-side: color-mix(in srgb, var(--color-lilac) 50%, black);
+  --build-tangerine-top: color-mix(in srgb, var(--color-tangerine) 60%, white);
+  --build-tangerine-side: color-mix(in srgb, var(--color-tangerine) 50%, black);
+  --build-board: #2f6f7e;
+  --build-board-top: #478e9d;
+  --build-board-side: #1d4650;
+  --build-plane: rgb(111 143 232 / 0.4);
+  --build-plane-grid: rgb(200 214 255 / 0.4);
+  /* ch 9 crowd: silhouettes, lighter with distance */
+  --crowd-far: rgb(78 60 112);
+  --crowd-mid: rgb(52 36 78);
+  --crowd-near: rgb(30 18 44);
+  --crowd-front: rgb(20 11 30);
+  /* ch 2 stage */
+  --illus-curtain: #a52763;
+  --illus-curtain-light: #d9508a;
+  --illus-curtain-deep: #4a0a2a;
+  --illus-plank: rgb(92 52 58);
+  --illus-plank-2: rgb(64 34 44);
+  /* ch 14 road */
+  --illus-road: rgb(40 24 52);
+  --illus-road-far: rgb(74 50 96);
+  --illus-verge: rgb(24 14 34);
+  --illus-hills: rgb(52 34 76);
+  /* ch 17 wall */
+  --illus-brick: rgb(80 38 58);
+  --illus-brick-2: rgb(66 30 50);
+  --illus-brick-3: rgb(96 48 66);
+  --illus-mortar: rgb(28 13 28);
+  /* ch 15 panel: the same depth as the ch 3 board, lit in the detour's lilac */
+  --hub-panel-fill: linear-gradient(170deg, #241a3a 0%, #150f25 100%);
+  --hub-panel-shadow: inset 0 1px 0 rgb(255 241 232 / 0.14), inset 0 0 0 10px rgb(255 241 232 / 0.04), 0 50px 90px -40px rgb(0 0 0 / 0.8), 0 0 80px -30px rgb(185 163 255 / 0.45);
+  --hub-lane: rgb(255 241 232 / 0.035);
+
+  /* Chrome + panels */
+  --story-bar-fill: rgb(18 8 18 / 0.72);
+  /* Top scrim: content passing under the header dims before it reaches the pills (dense to
+     ~70% of its height), then clears over its last fifth, where a pinned heading rests
+     (motion.story.pin.safe: the header's height minus headerOverlap). */
+  --story-header-fade: linear-gradient(180deg, rgb(16 8 18 / 0.98) 0%, rgb(16 8 18 / 0.95) 55%, rgb(16 8 18 / 0.86) 68%, rgb(16 8 18 / 0.38) 82%, rgb(16 8 18 / 0) 100%);
+  /* Bottom band behind the progress rail, mirroring the header fade: text below the frame (the
+     next scene's heading while a pin holds) stays hidden under the dots. */
+  --story-progress-fade: linear-gradient(0deg, rgb(16 8 18 / 0.97) 0%, rgb(16 8 18 / 0.92) 42%, rgb(16 8 18 / 0.62) 70%, rgb(16 8 18 / 0) 100%);
+  --story-sheet-fill: linear-gradient(160deg, rgb(52 22 58 / 0.98), rgb(24 12 30 / 0.98));
+  --story-scrim: rgb(8 4 12 / 0.62);
+
+  /* "Explore the story" journal page: a centred card from lg, a bottom sheet below.
+     Tinted by the act's accent (data-accent on the card, mapped in global.css). */
+  --journal-scrim: radial-gradient(60% 80% at 50% 50%, rgb(8 4 12 / 0.55), rgb(8 4 12 / 0.82));
+  --journal-backdrop-blur: 3px;
+  --journal-width: 640px;
+  --journal-height: 652px;
+  --journal-radius: 28px;
+  --journal-hairline: rgb(255 241 232 / 0.08);
+  --journal-track: rgb(255 241 232 / 0.12);
+  --journal-shadow-base: inset 0 1px 0 rgb(255 241 232 / 0.14), inset 0 0 0 10px rgb(255 241 232 / 0.03), 0 50px 90px -40px rgb(0 0 0 / 0.9);
+  --journal-tint-peach: color-mix(in srgb, var(--color-peach) 19%, transparent);
+  --journal-tint-pink: color-mix(in srgb, var(--color-pink) 18%, transparent);
+  --journal-tint-lilac: color-mix(in srgb, var(--color-lilac) 19%, transparent);
+  --journal-tint-tangerine: color-mix(in srgb, var(--color-tangerine) 18%, transparent);
+  --journal-glow-peach: color-mix(in srgb, var(--color-peach) 35%, transparent);
+  --journal-glow-pink: color-mix(in srgb, var(--color-pink) 35%, transparent);
+  --journal-glow-lilac: color-mix(in srgb, var(--color-lilac) 45%, transparent);
+  --journal-glow-tangerine: color-mix(in srgb, var(--color-tangerine) 35%, transparent);
+  --journal-base-peach: var(--board-fill);
+  --journal-base-pink: linear-gradient(170deg, #2c1030 0%, #180a1c 100%);
+  --journal-base-lilac: var(--hub-panel-fill);
+  --journal-base-tangerine: linear-gradient(170deg, #221a38 0%, #140e24 100%);
+  --journal-fill-peach: radial-gradient(90% 40% at 50% 0%, var(--journal-tint-peach), transparent 70%), var(--journal-base-peach);
+  --journal-fill-pink: radial-gradient(90% 40% at 50% 0%, var(--journal-tint-pink), transparent 70%), var(--journal-base-pink);
+  --journal-fill-lilac: radial-gradient(90% 40% at 50% 0%, var(--journal-tint-lilac), transparent 70%), var(--journal-base-lilac);
+  --journal-fill-tangerine: radial-gradient(90% 40% at 50% 0%, var(--journal-tint-tangerine), transparent 70%), var(--journal-base-tangerine);
+  --journal-shadow-peach: var(--journal-shadow-base), 0 0 80px -30px var(--journal-glow-peach);
+  --journal-shadow-pink: var(--journal-shadow-base), 0 0 80px -30px var(--journal-glow-pink);
+  --journal-shadow-lilac: var(--journal-shadow-base), 0 0 80px -30px var(--journal-glow-lilac);
+  --journal-shadow-tangerine: var(--journal-shadow-base), 0 0 80px -30px var(--journal-glow-tangerine);
+  /* Journal type: natural reading sizes (the title never above 28px). */
+  --journal-title-min: 22;
+  --journal-title-max: 28;
+  --fs-journal-title: clamp(
+    calc(var(--journal-title-min) * 1px),
+    calc(var(--journal-title-min) * 1px + (var(--journal-title-max) - var(--journal-title-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--journal-title-max) * 1px)
+  );
+  /* Below lg (the sheet) the title is a fixed 22px. */
+  --fs-journal-title-sheet: 22px;
+  /* Below lg the sheet stays full width, its text column capped (tablets). */
+  --journal-sheet-measure: 600px;
+  --fs-journal-act: 13px;
+  --fs-journal-body: 17px;
+  --fs-journal-beat: 21px;
+  --fs-journal-quote: 21px;
+  --fs-journal-dive-heading: 13px;
+  --fs-journal-dive-body: 16px;
+  --story-progress-track: rgb(255 241 232 / 0.18);
+
+  /* Story type scale (same fluid formula as the Portfolio roles) */
+  /* Natural reading sizes: the titles lead, but never crowd a pinned frame. The three tiers
+     (major / standard / compact) stay close, so the type feels even from chapter to chapter. */
+  --story-title-major-min: 28;
+  --story-title-major-max: 44;
+  --story-title-min: 25;
+  --story-title-max: 39;
+  --story-title-compact-min: 23;
+  --story-title-compact-max: 34;
+  --story-line-major-min: 18;
+  --story-line-major-max: 22;
+  --story-line-min: 17;
+  --story-line-max: 21;
+  --story-prologue-min: 42;
+  --story-prologue-max: 80;
+  /* The prologue's title also keeps to the viewport's height, so the whole prologue (title,
+     line, button) sits above the horizon on short screens too. */
+  --story-prologue-max-vh: 8.4svh;
+  /* The prologue block's bottom padding: below lg, the scene's own; from lg, clear of the
+     horizon (at 80% of the viewport, the scene starting 64px down) by 44px. */
+  --story-prologue-pad-bottom: 30svh;
+  --story-prologue-pad-bottom-lg: calc(20svh + 64px + 44px);
+  /* Ch 18's ending: the email pill a step more compact on phones. */
+  --fs-story-ending-pill-sm: 14px;
+  --story-quote-min: 28;
+  --story-quote-max: 40;
+  /* The other chapters' beats sit in the text column, under the lines: a step smaller than ch 3's. */
+  --story-quote-scene-min: 22;
+  --story-quote-scene-max: 30;
+  --story-numeral-min: 120;
+  --story-numeral-max: 300;
+
+  --fs-story-title-major: clamp(
+    calc(var(--story-title-major-min) * 1px),
+    calc(var(--story-title-major-min) * 1px + (var(--story-title-major-max) - var(--story-title-major-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-title-major-max) * 1px)
+  );
+  --fs-story-title: clamp(
+    calc(var(--story-title-min) * 1px),
+    calc(var(--story-title-min) * 1px + (var(--story-title-max) - var(--story-title-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-title-max) * 1px)
+  );
+  --fs-story-title-compact: clamp(
+    calc(var(--story-title-compact-min) * 1px),
+    calc(var(--story-title-compact-min) * 1px + (var(--story-title-compact-max) - var(--story-title-compact-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-title-compact-max) * 1px)
+  );
+  --fs-story-line-major: clamp(
+    calc(var(--story-line-major-min) * 1px),
+    calc(var(--story-line-major-min) * 1px + (var(--story-line-major-max) - var(--story-line-major-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-line-major-max) * 1px)
+  );
+  --fs-story-line: clamp(
+    calc(var(--story-line-min) * 1px),
+    calc(var(--story-line-min) * 1px + (var(--story-line-max) - var(--story-line-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-line-max) * 1px)
+  );
+  --fs-story-prologue: min(
+    clamp(
+      calc(var(--story-prologue-min) * 1px),
+      calc(var(--story-prologue-min) * 1px + (var(--story-prologue-max) - var(--story-prologue-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+      calc(var(--story-prologue-max) * 1px)
+    ),
+    max(calc(var(--story-prologue-min) * 1px), var(--story-prologue-max-vh))
+  );
+  --fs-story-quote: clamp(
+    calc(var(--story-quote-min) * 1px),
+    calc(var(--story-quote-min) * 1px + (var(--story-quote-max) - var(--story-quote-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-quote-max) * 1px)
+  );
+  --fs-story-quote-scene: clamp(
+    calc(var(--story-quote-scene-min) * 1px),
+    calc(var(--story-quote-scene-min) * 1px + (var(--story-quote-scene-max) - var(--story-quote-scene-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-quote-scene-max) * 1px)
+  );
+  /* ch 3's question: the scene's largest type below lg; under the (desktop) board, a step
+     above the other beats. */
+  --fs-story-quote-board: var(--fs-story-quote);
+  --fs-story-numeral: clamp(
+    calc(var(--story-numeral-min) * 1px),
+    calc(var(--story-numeral-min) * 1px + (var(--story-numeral-max) - var(--story-numeral-min)) * (100vw - var(--vp-min) * 1px) / (var(--vp-max) - var(--vp-min))),
+    calc(var(--story-numeral-max) * 1px)
+  );
+}
+
+/* Phones: ch 3's quote a step tighter, so the heading, the (landscape) board and the quote
+   fit one pinned frame together (still the scene's largest type); ch 18's ending clear of the sun. */
+@media (max-width: 767.98px) {
+  :root {
+    --story-quote-min: 26;
+    --story-title-major-min: 27;
+    /* The other beats share the text column with the lines: compact on phones. */
+    --story-quote-scene-min: 19;
+    /* ch 18's ending controls end left of the sun's column (its left edge at --story-sun-x,
+       80% of the width, minus its radius), so they never cover it, pinned or scrolling. */
+    --story-ending-max-w: calc(80vw - var(--story-sun-size) / 2 - var(--gutter) - 14px);
+  }
+}
+
+/* Short or narrow phones: the story's type a step smaller, so a pinned scene's heading, lines
+   and art share the frame with the art at a readable scale. */
+@media (max-width: 767.98px) and (max-height: 760px), (max-width: 359.98px) {
+  :root {
+    --story-title-major-min: 24;
+    --story-title-min: 23;
+    --story-title-compact-min: 22;
+    --story-line-major-min: 16;
+    --story-line-min: 15;
+    /* ch 3: the quote gives up room to the board (which keeps ~60% of the frame width). */
+    --story-quote-min: 22;
+    --story-quote-scene-min: 17;
+  }
+}
+
+/* Portrait phones: ch 3's question about 13% smaller, so the chapter can sit lower with its
+   board (still the scene's largest type). */
+@media (max-width: 767.98px) and (orientation: portrait) {
+  :root {
+    --fs-story-quote-board: calc(var(--fs-story-quote) * 0.87);
+  }
+}
+/* …narrow ones a step smaller still, so its last line ("and in English?”") ends left of the sun. */
+@media (max-width: 369.98px) and (orientation: portrait) {
+  :root {
+    --fs-story-quote-board: calc(var(--fs-story-quote) * 0.78);
+  }
+}
+
+/* Landscape phones (short and wide, below desktop): compact, fixed story type; the text sits
+   beside the art there (global.css). */
+@media (max-width: 1023.98px) and (max-height: 500px) and (orientation: landscape) {
+  :root {
+    --fs-story-prologue: 40px;
+    --fs-story-title-major: 24px;
+    --fs-story-title: 22px;
+    --fs-story-title-compact: 21px;
+    --fs-story-line-major: 16px;
+    --fs-story-line: 15px;
+    --fs-story-quote: 24px;
+    --fs-story-quote-scene: 20px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --fs-story-quote-board: calc(var(--fs-story-quote-scene) * 1.12);
+    --story-horizon-y: 80svh;
+    --story-sun-x: 86%; /* the right-hand lane: scene art stays left of it */
+    --story-sun-size: clamp(150px, 13vw, 230px);
+    --story-boat-size: 216px;
+    --story-boat-x: 72%;
+    --story-boat-depth: 0.5;
+  }
+}
+
+/* Short desktop screens: the major chapters' lines and the typographic beats a step smaller, so
+   a pinned column (heading, lines, quote, controls) stays inside the frame with its heading. */
+@media (min-width: 1024px) and (max-height: 820px) {
+  :root {
+    --story-title-major-max: 40;
+    --story-line-major-max: 21;
+    --story-line-major-min: 18;
+    --story-quote-scene-max: 26;
+  }
+}
+
+/* Very narrow phones: keep one-line labels. */
+@media (max-width: 359.98px) {
+  :root {
+    --fs-label: 11px;
+    --ls-label: 0.12em;
+  }
+}
+
+@media (min-width: 768px) {
+  :root {
+    --topbar-h: 81px;
+    --gutter: 32px;
+    --glow-stat: 0 0 26px;
+    --fs-project-role: 22px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --topbar-h: 93px;
+    --pool-field-h: 4800px;
+    --gutter: 64px;
+    --r-panel: 34px;
+    --r-stat: 30px;
+    --r-project: 40px;
+    --fs-body: 16px;
+    --fs-support: 14px;
+    --fs-section-number: 15px;
+  }
+}

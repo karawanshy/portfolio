@@ -1,0 +1,115 @@
+/* ---------------------------------------------------------------------------
+ * Story (/story): JS / no-JS pairs. With JS, "Explore the story" opens a dialog
+ * and the chapter indicator opens the index; without JS, each chapter's story is
+ * an inline <details> and the index is a static :target overlay (#chapters).
+ * ------------------------------------------------------------------------- */
+html.js [data-nojs-only],
+html:not(.js) [data-js-only] {
+  display: none !important;
+}
+html:not(.js) [data-static-index]:not(:target) {
+  display: none;
+}
+/* The Story's sun (StoryStage): ONE sun whose state tells the progress — height --sun-h
+   (−1 sunk below the horizon · 0 the half-sun ◒ on it · 1 fully risen) and brightness --sun-b
+   (0 dull · 1 radiant). Motion (useStoryStage) writes them inline, scroll-linked; otherwise the
+   current chapter's static values apply (--sun-h0 / --sun-b0 from StoryStage: reduced motion;
+   no JS = the prologue). Distances and response curves are tokens (tokens.css --story-sun-*).
+   Only transform and opacity change. */
+[data-story-sun] {
+  --sun-hv: var(--sun-h, var(--sun-h0, 0));
+  --sun-bv: var(--sun-b, var(--sun-b0, 0.6));
+  /* Up: below the horizon it sinks by up to --story-sun-sink; above, it rises by up to
+     --story-sun-rise and drifts toward the right-hand lane (fully by --story-sun-drift-by). */
+  --sun-lift: calc(min(var(--sun-hv), 0) * var(--story-sun-sink) + max(var(--sun-hv), 0) * var(--story-sun-rise));
+  --sun-shift: calc(clamp(0, var(--sun-hv) / var(--story-sun-drift-by), 1) * var(--story-sun-drift));
+  /* Bloom (halo growth, glow): only when high and bright. */
+  --sun-bloom: calc(clamp(0, (var(--sun-hv) - var(--story-sun-bloom-from)) / (1 - var(--story-sun-bloom-from)), 1) * var(--sun-bv));
+}
+[data-story-sun-body] {
+  transform: translate(var(--sun-shift), calc(var(--sun-lift) * -1));
+}
+[data-story-sun-full] {
+  opacity: calc(var(--story-sun-disc-min) + (1 - var(--story-sun-disc-min)) * var(--sun-bv));
+}
+[data-story-sun-glow] {
+  opacity: calc(var(--sun-bv) * var(--sun-bv) * (var(--story-sun-glow-min) + (1 - var(--story-sun-glow-min)) * clamp(0, var(--sun-hv), 1)));
+}
+[data-story-sun-halo] {
+  opacity: calc(var(--story-sun-halo-min) + (1 - var(--story-sun-halo-min)) * var(--sun-bv));
+  transform: translate(var(--sun-shift), calc(var(--sun-lift) * -1)) scale(calc(1 + var(--story-sun-bloom) * var(--sun-bloom)));
+}
+[data-story-sun-flare] {
+  opacity: calc(
+    clamp(0, (var(--sun-bv) - var(--story-sun-flare-from)) / (1 - var(--story-sun-flare-from)), 1) *
+      clamp(0, (var(--sun-hv) + 0.2) / 1.2, 1)
+  );
+  transform: translate(var(--sun-shift), -50%);
+}
+[data-story-sun-lines] {
+  opacity: calc(var(--sun-bv) * (1 - clamp(0, var(--sun-hv) / 0.6, 1)));
+}
+
+/* Illustrations with scroll motion wait (hidden) for their first frame, then fade in: a page
+   loaded mid-story never shows finished art jump back to its start. Not without JS, and not
+   with reduced motion (the art is static, final). useStoryScenes sets data-illus-ready. */
+@media (prefers-reduced-motion: no-preference) {
+  html.js
+    :is(
+      [data-illus='spark'],
+      [data-illus='stage'],
+      [data-illus='door'],
+      [data-illus='workbench'],
+      [data-illus='crowd'],
+      [data-illus='days'],
+      [data-illus='window'],
+      [data-illus='windows-dark'],
+      [data-illus='fork'],
+      [data-illus='hub'],
+      [data-illus='trunk'],
+      [data-illus='doorway']
+    ) {
+    transition: opacity 450ms ease-out;
+  }
+  html.js
+    :is(
+      [data-illus='spark'],
+      [data-illus='stage'],
+      [data-illus='door'],
+      [data-illus='workbench'],
+      [data-illus='crowd'],
+      [data-illus='days'],
+      [data-illus='window'],
+      [data-illus='windows-dark'],
+      [data-illus='fork'],
+      [data-illus='hub'],
+      [data-illus='trunk'],
+      [data-illus='doorway']
+    ):not([data-illus-ready]) {
+    opacity: 0;
+  }
+}
+
+/* ch 16 without JS: the trunk closed, as reduced motion shows it (mirrors motion.story.illus.trunk:
+   the lid folded about its hinge at y 124 to lidClosed, the box behind it at boxBehindLid, the
+   tail lights on). */
+html:not(.js) [data-trunk-lid],
+html:not(.js) [data-trunk-lid-line] {
+  transform: translate(0, 124px) scale(1, -0.74) translate(0, -124px);
+}
+html:not(.js) [data-illus='trunk'] [data-box] {
+  opacity: 0.12;
+}
+html:not(.js) [data-tail-light] {
+  opacity: 1;
+  filter: var(--illus-glow-pink);
+}
+
+.story-details > summary,
+.project-details > summary {
+  list-style: none;
+}
+.story-details > summary::-webkit-details-marker,
+.project-details > summary::-webkit-details-marker {
+  display: none;
+}
